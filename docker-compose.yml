@@ -1,0 +1,29 @@
+version: '3.6'
+
+volumes:
+  dbdata: {}
+
+services:
+  redis:
+    image: redis:4.0-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+
+  db:
+    image: postgres:10-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: rails
+      POSTGRES_DB: unijournal
+      POSTGRES_PASSWORD: password
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
