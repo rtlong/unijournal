@@ -11,5 +11,8 @@
 
   <body>
     <%= yield %>
+    <script>
+    window.pageState = <%= client_state.to_json.html_safe %>
+    </script>
   </body>
 </html>
