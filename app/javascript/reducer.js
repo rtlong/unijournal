@@ -4,10 +4,10 @@ import {
   NEW_POST_SOURCE_CHANGED,
 } from './actions'
 
-const initialState = {
+export const initialState = {
   posts: [],
   newPostFormExpanded: false,
-  newPostSource: null,
+  newPostSource: '',
 }
 
 export default function reducer(state = initialState, action) {
@@ -37,3 +37,5 @@ export default function reducer(state = initialState, action) {
     return state
   }
 }
+
+reducer.initialState = initialState

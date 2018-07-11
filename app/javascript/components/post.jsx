@@ -2,10 +2,18 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Markdown from 'react-markdown'
 
+import Timestamp from './timestamp'
+
+const style = {
+  borderTop: '1px solid black',
+  margin: '1em 0 1em 0',
+  padding: '1em 0 0 0',
+}
+
 const Post = ({ body, timestamp }) => (
-  <div className="Post">
+  <div className="post" style={style}>
     <Markdown>{body}</Markdown>
-    <div>{timestamp.toString()}</div>
+    <Timestamp timestamp={timestamp}/>
   </div>
 )
 
