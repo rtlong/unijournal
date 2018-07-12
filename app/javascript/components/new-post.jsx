@@ -8,32 +8,32 @@ const NewPost = props => {
   let input
   let onSubmit = e => {
     e.preventDefault()
-    props.onNewPostSubmit()
+    props.onSubmit()
   }
 
   return props.expanded ? (
     <div>
-      <Link label="Close" onClick={props.onNewPostCancel} />
+      <Link label="Close" onClick={props.onCancel} />
       <div>
         <form onSubmit={onSubmit}>
-          <textarea value={props.source} onChange={e => props.onNewPostChanged(e.target.value)}/>
+          <textarea value={props.source} onChange={e => props.onChange(e.target.value)}/>
           <input type="submit"/>
         </form>
         <Markdown source={props.source}/>
       </div>
     </div>
   ) : (
-    <Link label="New Post" onClick={props.onNewPostOpen} />
+    <Link label="New Post" onClick={props.onOpen} />
   )
 }
 
 NewPost.propTypes = {
   expanded: PropTypes.bool.isRequired,
   source: PropTypes.string,
-  onNewPostSubmit: PropTypes.func.isRequired,
-  onNewPostOpen: PropTypes.func.isRequired,
-  onNewPostCancel: PropTypes.func.isRequired,
-  onNewPostChanged: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onOpen: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
 }
 
 export default NewPost

@@ -12,7 +12,7 @@ const style = {
 
 const Post = ({ body, timestamp }) => (
   <div className="post" style={style}>
-    <Markdown>{body}</Markdown>
+    <Markdown source={body} />
     <Timestamp timestamp={timestamp}/>
   </div>
 )

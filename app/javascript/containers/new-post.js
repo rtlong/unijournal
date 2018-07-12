@@ -17,10 +17,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onNewPostOpen: () => dispatch(newPostFormSetExpanded(true)),
-    onNewPostCancel: () => dispatch(newPostFormSetExpanded(false)),
-    onNewPostSubmit: () => dispatch(addPost()),
-    onNewPostChanged: body => dispatch(newPostSourceChanged(body)),
+    onOpen: () => dispatch(newPostFormSetExpanded(true)),
+    onCancel: () => dispatch(newPostFormSetExpanded(false)),
+    onSubmit: () => dispatch(addPost()),
+    onChange: body => dispatch(newPostSourceChanged(body)),
   }
 }
 

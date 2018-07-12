@@ -3,10 +3,10 @@ import { shallow } from 'enzyme'
 import moment from 'moment'
 import delay from 'delay'
 
-import test from '../../../test-helper'
+import { test } from '../../../test-helper'
 import Timestamp from './timestamp'
 
-test('it displays the moment.js relative string', t => {
+test('Timestamp / displays the moment.js relative string', t => {
   const cases = [
     moment(),
     moment().subtract(1, 'minutes'),
@@ -17,7 +17,7 @@ test('it displays the moment.js relative string', t => {
   ]
 
   cases.forEach(timestamp => {
-    t.test(timestamp.fromNow(), st => {
+    t.test(t.name + ' / ' + timestamp.fromNow(), st => {
       st.plan(3)
       const component = shallow(
         <Timestamp timestamp={timestamp}/>,
@@ -35,7 +35,7 @@ test('it displays the moment.js relative string', t => {
   t.end()
 })
 
-test('it updates itself', async t => {
+test('Timestamp / updates itself', async t => {
   const timestamp = moment().subtract(44, 'seconds') // moment splits from 'a few seconds ago' to 'a minute ago' at 45 seconds
   const component = shallow(<Timestamp timestamp={timestamp} updateInterval={250}/>)
   const el = component.find('abbr.timestamp')
