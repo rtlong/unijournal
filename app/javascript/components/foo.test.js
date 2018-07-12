@@ -1,5 +1,6 @@
-import test from 'ava'
+import test from '../../../test-helper'
 
-test('foo', t => {
-  t.pass()
+test('sanity check', t => {
+  // This test is useless but it should always pass; if it doesn't something's wrong
+  t.end()
 })

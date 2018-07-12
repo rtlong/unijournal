@@ -3,7 +3,11 @@
   "private": true,
   "dependencies": {
     "@rails/webpacker": "3.5",
+    "babel-core": "^6.26.3",
     "babel-preset-react": "^6.24.1",
+    "babel-runtime": "^6.26.0",
+    "caniuse-lite": "^1.0.30000697",
+    "moment": "^2.22.2",
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
@@ -12,6 +16,17 @@
     "redux": "^4.0.0"
   },
   "devDependencies": {
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "blue-tape": "^1.0.0",
+    "delay": "^3.0.0",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "faucet": "^0.0.1",
+    "react-test-renderer": "^16.4.1",
+    "tape": "^4.9.1",
+    "webpack": "^3.0.0",
     "webpack-dev-server": "2.11.2"
   }
 }

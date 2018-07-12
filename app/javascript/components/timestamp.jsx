@@ -12,8 +12,20 @@ class Timestamp extends React.Component {
     }
   }
 
+  static defaultProps = {
+    updateInterval: 30000,
+  }
+
+  static propTypes = {
+    updateInterval: PropTypes.number.isRequired,
+    timestamp: PropTypes.oneOfType([
+      PropTypes.instanceOf(Date),
+      PropTypes.instanceOf(moment),
+    ]).isRequired,
+  }
+
   componentDidMount() {
-    this.timerId = setInterval(() => this.tick(), 30000)
+    this.timerId = setInterval(() => this.tick(), this.props.updateInterval)
   }
 
   componentWillUnmount() {
@@ -28,7 +40,9 @@ class Timestamp extends React.Component {
 
   render() {
     return (
-      <abbr title={this.props.timestamp.toString()} className="timestamp">{this.state.text}</abbr>
+      <abbr title={this.props.timestamp.toString()} className="timestamp">
+        {this.state.text}
+      </abbr>
     )
   }
 }

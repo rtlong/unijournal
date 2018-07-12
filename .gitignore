@@ -32,3 +32,8 @@
 yarn-debug.log*
 .yarn-integrity
 .rubocop-http*yml
+/public/packs
+/public/packs-test
+/node_modules
+yarn-debug.log*
+.yarn-integrity
