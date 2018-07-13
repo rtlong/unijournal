@@ -1,40 +1,58 @@
-import {
-  ADD_POST,
-  NEW_POST_FORM_EXPAND,
-  NEW_POST_SOURCE_CHANGED,
-} from './actions'
+import { combineReducers } from 'redux'
+
+import ACTIONS from './actions'
 
 export const initialState = {
   posts: [],
-  newPostFormExpanded: false,
-  newPostSource: '',
+  newPostForm: {
+    source: '',
+    expanded: false,
+  },
 }
 
-export default function reducer(state = initialState, action) {
+function complexReducer(state = initialState, action) {
   switch (action.type) {
-  case ADD_POST:
+  case ACTIONS.ADD_POST:
     return {
       ...state,
       posts: [
         ...state.posts,
         {
-          body: action.body || state.newPostSource,
+          body: action.body || state.newPostForm.source,
           timestamp: action.timestamp,
         },
       ],
-      newPostSource: '',
     }
+  default:
+    return state
+  }
+}
 
-  case NEW_POST_FORM_EXPAND:
+function posts(state = initialState.posts, action) {
+  switch (action.type) {
+  default:
+    return state
+  }
+}
+
+function newPostForm(state = initialState.newPostForm, action) {
+  switch (action.type) {
+  case ACTIONS.ADD_POST:
     return {
       ...state,
-      newPostFormExpanded: action.value,
+      source: '',
     }
 
-  case NEW_POST_SOURCE_CHANGED:
+  case ACTIONS.NEW_POST_FORM_EXPAND:
     return {
       ...state,
-      newPostSource: action.value,
+      expanded: action.value,
+    }
+
+  case ACTIONS.NEW_POST_SOURCE_CHANGED:
+    return {
+      ...state,
+      source: action.value,
     }
 
   default:
@@ -42,4 +60,12 @@ export default function reducer(state = initialState, action) {
   }
 }
 
-reducer.initialState = initialState
+export default function reducer(state, action) {
+  return [
+    complexReducer,
+    combineReducers({
+      posts,
+      newPostForm,
+    }),
+  ].reduce((s, r) => r(s, action), state)
+}

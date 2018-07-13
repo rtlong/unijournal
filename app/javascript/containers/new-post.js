@@ -1,27 +1,24 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 
 import {
   addPost,
-  newPostFormSetExpanded,
+  newPostFormClose,
+  newPostFormOpen,
   newPostSourceChanged,
 } from '../actions'
 import NewPost from '../components/new-post'
 
 const mapStateToProps = (state) => {
-  return {
-    expanded: state.newPostFormExpanded,
-    source: state.newPostSource,
-  }
+  return state.newPostForm
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    onOpen: () => dispatch(newPostFormSetExpanded(true)),
-    onCancel: () => dispatch(newPostFormSetExpanded(false)),
-    onSubmit: () => dispatch(addPost()),
-    onChange: body => dispatch(newPostSourceChanged(body)),
-  }
-}
+const mapDispatchToProps = dispatch => bindActionCreators({
+  onOpen: newPostFormOpen,
+  onCancel: newPostFormClose,
+  onSubmit: addPost,
+  onChange: newPostSourceChanged,
+}, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(NewPost)

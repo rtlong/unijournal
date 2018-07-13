@@ -1,25 +1,37 @@
-export const ADD_POST = 'ADD_POST'
-export const NEW_POST_FORM_EXPAND = 'NEW_POST_FORM_EXPAND'
-export const NEW_POST_SOURCE_CHANGED = 'NEW_POST_SOURCE_CHANGED'
+const ACTIONS = {};
+[
+  'ADD_POST',
+  'NEW_POST_FORM_EXPAND',
+  'NEW_POST_SOURCE_CHANGED',
+].forEach(sym => ACTIONS[sym] = sym)
+
+export default ACTIONS
 
 export function addPost(body=null) {
   return {
-    type: ADD_POST,
+    type: ACTIONS.ADD_POST,
     body,
     timestamp: new Date(),
   }
 }
 
-export function newPostFormSetExpanded(value) {
+export function newPostFormOpen() {
   return {
-    type: NEW_POST_FORM_EXPAND,
-    value,
+    type: ACTIONS.NEW_POST_FORM_EXPAND,
+    value: true,
+  }
+}
+
+export function newPostFormClose() {
+  return {
+    type: ACTIONS.NEW_POST_FORM_EXPAND,
+    value: false,
   }
 }
 
 export function newPostSourceChanged(value) {
   return {
-    type: NEW_POST_SOURCE_CHANGED,
+    type: ACTIONS.NEW_POST_SOURCE_CHANGED,
     value,
   }
 }

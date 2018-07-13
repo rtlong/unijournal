@@ -5,10 +5,11 @@ import configureStore from 'redux-mock-store'
 import { test } from '../../../test-helper'
 import {
   addPost,
-  newPostFormSetExpanded,
+  newPostFormOpen,
+  newPostFormClose,
   newPostSourceChanged,
 } from '../actions'
-import { initialState } from '../reducer'
+import reducer, { initialState } from '../reducer'
 import NewPostContainer from './new-post'
 
 const middlewares = []
@@ -22,11 +23,11 @@ test('containers/NewPost / dispatch', t => {
   t.ok(component)
 
   component.prop('onOpen')()
-  t.deepEqual(store.getActions(), [newPostFormSetExpanded(true)])
+  t.deepEqual(store.getActions(), [newPostFormOpen()])
   store.clearActions()
 
   component.prop('onCancel')()
-  t.deepEqual(store.getActions(), [newPostFormSetExpanded(false)])
+  t.deepEqual(store.getActions(), [newPostFormClose()])
   store.clearActions()
 
   component.prop('onSubmit')()
@@ -42,18 +43,23 @@ test('containers/NewPost / dispatch', t => {
 })
 
 test('containers/NewPost / state', t => {
-  const store = mockStore(Object.assign({}, initialState, {
-    newPostFormExpanded: true,
-    newPostSource: 'blah bhhoo',
-  }))
+  const store = mockStore(buildState(initialState, [
+    newPostFormOpen(),
+    newPostSourceChanged('foo')
+  ]))
 
   const wrapper = shallow(<NewPostContainer/>, { context: { store } })
   const component = wrapper.find('NewPost')
   t.ok(component)
 
   const state = store.getState()
-  t.equal(component.prop('expanded'), state.newPostFormExpanded)
-  t.equal(component.prop('source'), state.newPostSource)
+  t.comment(JSON.stringify(state))
+  t.equal(component.prop('expanded'), true)
+  t.equal(component.prop('source'), 'foo')
 
   t.end()
 })
+
+function buildState(initialState, actions) {
+  return actions.reduce(reducer, initialState)
+}
