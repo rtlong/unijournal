@@ -8,7 +8,7 @@ import Post from './post'
 test('components/Post', suite => {
   const body = 'some text'
   const timestamp = new Date()
-  const component = shallow(<Post body={body} timestamp={timestamp}/>)
+  const component = shallow(<Post body={body} timestamp={timestamp} />)
 
   suite.test('renders @body using <ReactMarkdown/>', t => {
     const markdown = component.find(Markdown)

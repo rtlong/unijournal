@@ -21,8 +21,9 @@ test('components/Timestamp', suite => {
       t.test(timestamp.fromNow(), st => {
         st.plan(3)
         const component = shallow(
-          <Timestamp timestamp={timestamp}/>,
-          { disableLifecycleMethods: true })
+          <Timestamp timestamp={timestamp} />,
+          { disableLifecycleMethods: true },
+        )
         const el = component.find('abbr.timestamp')
         st.ok(el,
               'should have correct element')

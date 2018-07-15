@@ -6,7 +6,9 @@ import NewPost from './containers/new-post'
 
 const App = props => (
   <div>
-    <h1>Journal</h1>
+    <h1>
+      Journal
+    </h1>
     <NewPost />
     <PostList />
   </div>

@@ -19,7 +19,7 @@ test('containers/NewPost', suite => {
   suite.test('dispatch', t => {
     const store = mockStore(initialState)
 
-    const wrapper = shallow(<NewPostContainer/>, { context: { store } })
+    const wrapper = shallow(<NewPostContainer />, { context: { store } })
     const component = wrapper.find('NewPost')
     t.ok(component)
 
@@ -46,10 +46,10 @@ test('containers/NewPost', suite => {
   suite.test('state', t => {
     const store = mockStore(buildState(initialState, [
       newPostFormOpen(),
-      newPostSourceChanged('foo')
+      newPostSourceChanged('foo'),
     ]))
 
-    const wrapper = shallow(<NewPostContainer/>, { context: { store } })
+    const wrapper = shallow(<NewPostContainer />, { context: { store } })
     const component = wrapper.find('NewPost')
     t.ok(component)
 

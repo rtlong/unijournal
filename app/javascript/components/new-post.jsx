@@ -6,7 +6,7 @@ import Link from './link'
 
 const NewPost = props => {
   let input
-  let onSubmit = e => {
+  const onSubmit = e => {
     e.preventDefault()
     props.onSubmit()
   }
@@ -16,10 +16,10 @@ const NewPost = props => {
       <Link label="Close" onClick={props.onCancel} />
       <div>
         <form onSubmit={onSubmit}>
-          <textarea value={props.source} onChange={e => props.onChange(e.target.value)}/>
-          <input type="submit"/>
+          <textarea value={props.source} onChange={e => props.onChange(e.target.value)} />
+          <input type="submit" />
         </form>
-        <Markdown source={props.source}/>
+        <Markdown source={props.source} />
       </div>
     </div>
   ) : (

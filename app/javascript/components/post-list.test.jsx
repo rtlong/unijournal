@@ -16,12 +16,12 @@ test('components/PostList', suite => {
         timestamp: new Date(),
       },
     ]
-    const component = shallow(<PostList posts={posts}/>)
+    const component = shallow(<PostList posts={posts} />)
     const postComponents = component.find('Post')
 
     t.equal(postComponents.length, posts.length)
 
-    for(let i = 0; i < posts.length; i++) {
+    for (let i = 0; i < posts.length; i++) {
       const post = postComponents.at(i)
       t.equal(post.key(), i.toString())
       t.deepEqual(post.props(), posts[i])

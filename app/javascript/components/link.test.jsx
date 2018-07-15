@@ -19,7 +19,7 @@ test('components/Link', suite => {
     const onClick = e => { clicked = e }
 
     jsdomInit()
-    const component = mount(<Link label={text} onClick={onClick}/>)
+    const component = mount(<Link label={text} onClick={onClick} />)
 
     t.false(clicked,
             'onClick has not fired before being clicked')

@@ -10,7 +10,7 @@ function buildComponentProps(opts) {
     expanded: false,
     source: '',
     onSubmit: mock(),
-    onOpen:   mock(),
+    onOpen: mock(),
     onCancel: mock(),
     onChange: mock(),
   }, opts)
@@ -19,11 +19,11 @@ function buildComponentProps(opts) {
 test('components/NewPost', suite => {
   suite.test('[expanded=false]', t => {
     const props = buildComponentProps({ expanded: false })
-    const component = shallow(<NewPost {...props}/>)
+    const component = shallow(<NewPost {...props} />)
     // t.ok(component.is(Link),
     //      'is a <Link>')
     t.equal(component.prop('onClick'), props.onOpen,
-            `Link's onClick is onOpen`)
+            'Link\'s onClick is onOpen')
     t.end()
   })
 
@@ -34,7 +34,7 @@ test('components/NewPost', suite => {
       source,
     })
     jsdomInit()
-    const component = mount(<NewPost {...props}/>)
+    const component = mount(<NewPost {...props} />)
 
     const markdown = component.find('ReactMarkdown')
     t.equal(markdown.length, 1,
@@ -66,7 +66,7 @@ test('components/NewPost', suite => {
     const form = component.find('form')
     t.false(props.onSubmit.called,
             '@onSubmit not called before <form> sumitted')
-    let evt = {
+    const evt = {
       preventDefault: mock(),
     }
     form.simulate('submit', evt)
