@@ -3,124 +3,59 @@
 import path from 'path'
 import { spawn } from 'child_process'
 import Faucet from 'faucet'
+import tapMin from 'tap-min'
 import Watchman from 'fb-watchman'
-
-let useFaucet = true
-const watchman = new Watchman.Client()
-
-const init = promisify(cb => watchman.capabilityCheck({optional: [], required: ['term-ipcre']}, cb))
-      .catch(err => {
-        console.error(error)
-        watchman.end()
-        throw(err)
-      })
-      // .then(resp => console.log(resp))
-
-const root = path.dirname(__dirname)
-
-const watchProject = init
-  .then(() => promisify(cb => watchman.command(['watch-project', root], cb)))
-  .then(resp => {
-    if ('warning' in resp) {
-      console.log('warning: ', resp.warning)
-    }
-    console.log('watch established on', resp.watch)
-    return resp
-  })
-  .catch(error => {
-    console.error('Error creating watch:', error)
-  })
-
-watchProject
-  .then(watchResp => {
-    const sub = {
-      expression: [
-        'allof',
-        ['ipcre', '.jsx?$'],
-        ['not',
-         ['ipcre', '^node_modules', 'wholename']],
-        ['not',
-         ['ipcre', '^\.#']],
-      ],
-      fields: ['name', 'exists'],
-    }
-    return promisify(cb => watchman.command(['subscribe', watchResp.watch, 'js', sub], cb))
-  })
-  .then(resp => {
-    if ('warning' in resp) {
-      console.log('warning: ', resp.warning)
-    }
-  })
-  .catch(error => {
-    console.error('Error creating subscription:', error)
-  })
-
-watchman.on('subscription', event => {
-  if (event.subscription !== 'js') return
-
-  const testFiles = []
-
-  const runAll = event.files.some(file => {
-    const isTestFile = testFilePattern.test(file.name)
-    if (!isTestFile) return true // if event includes any non-tests, short-circuit .some() to exit iteration and runAll = true
-    if (file.exists) testFiles.push(file.name) // still existing test file, add to list
-  })
-
-  if (runAll) {
-    runAllTests()
-  } else {
-    runTape(testFiles)
-  }
-})
-
-process.stdin.resume()
-process.stdin.setEncoding('utf8')
-process.stdin.on('data', chunk => {
-  switch(chunk.trim()) {
-  case '':
-  case 'r':
-    runAllTests()
-    break;
-  case 'f':
-    useFaucet = !useFaucet
-    console.log('Faucet output is', useFaucet ? 'on' : 'off')
-    break;
-  case 'q':
-    console.log('exiting...')
-    process.exit(0)
-    break;
-  default:
-    console.log({ chunk })
-  }
-})
 
 const testFilePattern = /\.test\.jsx?$/
 
-function runTape(testFiles) {
-  const cmd = ['node_modules/.bin/tape', '-r', 'babel-register', ...testFiles]
-  console.log('Running Tape', ...testFiles)
-  // run Tape process
-  const tape = spawn(process.execPath, cmd, { stdio: ['ignore', 'pipe', process.stderr] })
-        .on('error', err => {
-          console.error('error spawning `tape`', err)
-        })
-        .on('exit', code => {
-          console.error('Tape exited', code)
-        })
+let testFormatter = tapMin()
 
-  let stdout = tape.stdout
-  // pipe output through faucet and to stdout
-  if (useFaucet) {
-    const faucet = Faucet({
-      width: process.stdout.isTTY ? process.stdout.columns - 5 : 0,
-    })
-    stdout = stdout.pipe(faucet)
-  }
-  stdout.pipe(process.stdout)
+function runLinter(files) {
+  return new Promise((resolve, reject) => {
+    const cmd = ['node_modules/.bin/eslint', '--ext', 'js,jsx', ...files]
+    console.log('Running ESLint', ...files)
+    spawn(process.execPath, cmd, { stdio: 'inherit' })
+      .on('error', err => {
+        console.error(`error spawning ${cmd[0]}`, err)
+        reject(err)
+      })
+      .on('exit', code => {
+        console.error(`ESLint exited ${code}`)
+        return resolve()
+      })
+  })
+}
+
+function runLintAll() {
+  return runLinter('.')
+}
+
+function runTape(testFiles) {
+  return new Promise((resolve, reject) => {
+    const cmd = ['node_modules/.bin/tape', '-r', 'babel-register', ...testFiles]
+    console.log('Running Tape', ...testFiles)
+    // run Tape process
+    const tape = spawn(process.execPath, cmd, { stdio: ['ignore', 'pipe', process.stderr] })
+      .on('error', err => {
+        console.error(`error spawning ${cmd[0]}`, err)
+        reject(err)
+      })
+      .on('exit', code => {
+        console.error(`Tape exited ${code}`)
+        return resolve()
+      })
+
+    let { stdout } = tape
+    // pipe output through faucet and to stdout
+    if (testFormatter) {
+      stdout = stdout.pipe(testFormatter)
+    }
+    stdout.pipe(process.stdout)
+  })
 }
 
 function runAllTests() {
-  runTape(['app/javascript/**/*.test.js?(x)'])
+  return runTape(['app/javascript/**/*.test.js?(x)'])
 }
 
 function promisify(fn) {
@@ -136,3 +71,166 @@ function promisify(fn) {
     fn(cb)
   })
 }
+
+function initWatchman() {
+  const watchman = new Watchman.Client()
+  return promisify(cb => watchman.capabilityCheck({ optional: [], required: ['term-ipcre'] }, cb))
+    .then(() => watchman)
+    .catch(err => {
+      console.error(err)
+      process.exit(1)
+    })
+}
+
+function watchProject({ watchman, root }) {
+  return promisify(cb => watchman.command(['watch-project', root], cb))
+    .then(resp => {
+      if ('warning' in resp) {
+        console.log('warning: ', resp.warning)
+      }
+      console.log('watch established on', resp.watch)
+      return { watchman, resp }
+    })
+    .catch(error => {
+      console.error('Error creating watch:', error)
+      process.exit(1)
+    })
+}
+
+function subscribe({ watchman, root, name, sub }) {
+  return promisify(cb => watchman.command(['subscribe', root, name, sub], cb))
+    .then(resp => {
+      if ('warning' in resp) {
+        console.log('warning: ', resp.warning)
+      }
+      return { resp, watchman }
+    })
+    .catch(error => {
+      console.error('Error creating subscription:', error)
+      process.exit(1)
+    })
+}
+
+function setupWatchmanSubscriptionHandlers(watchman, scheduleProcess) {
+  watchman.on('subscription', ({ subscription, files }) => {
+    if (subscription !== 'test') return
+    const testFiles = []
+    const runAll = files.some(file => {
+      const isTestFile = testFilePattern.test(file.name)
+      if (!isTestFile) return true // if event includes any non-tests, short-circuit .some() to exit iteration and runAll = true
+      if (file.exists) testFiles.push(file.name) // still existing test file, add to list
+      return false
+    })
+
+    scheduleProcess(() => (runAll ? runAllTests() : runTape(testFiles)))
+  })
+  watchman.on('subscription', ({ subscription, files }) => {
+    if (subscription !== 'lint') return
+    const filesToLint = files
+      .filter(f => f.exists)
+      .map(f => (path.basename(f.name) === '.eslintrc'
+               ? path.dirname(f.name)
+               : f.name))
+    scheduleProcess(() => runLinter(filesToLint))
+  })
+}
+
+class ProcessManager {
+  constructor() {
+    this.promiseChain = Promise.resolve()
+  }
+
+  schedule(processFn) {
+    this.promiseChain = this.promiseChain
+                            .then(() => processFn())
+                            .catch(err => {
+                              console.error(`Error from ${processFn}:`, err)
+                            })
+  }
+}
+
+function buildFaucet() {
+  return Faucet({
+    width: process.stdout.isTTY ? process.stdout.columns - 5 : 0,
+  })
+}
+
+const root = path.dirname(__dirname)
+const procManager = new ProcessManager()
+
+const watchmanP = initWatchman()
+  .then(watchman => watchProject({ watchman, root }))
+  .then(args => {
+    const { watchman } = args
+    const scheduleProcess = proc => { procManager.schedule(proc) }
+    setupWatchmanSubscriptionHandlers(watchman, scheduleProcess)
+    return args
+  })
+
+watchmanP.then(({ watchman }) => {
+  const sub = {
+    expression: [
+      'allof',
+      ['ipcre', '.jsx?$'],
+      ['not', ['ipcre', '^node_modules', 'wholename']],
+      ['not', ['ipcre', '^\\.#']],
+    ],
+    fields: ['name', 'exists'],
+  }
+  return subscribe({
+    watchman,
+    sub,
+    root,
+    name: 'test',
+  })
+})
+
+watchmanP.then(({ watchman }) => {
+  const sub = {
+    expression: ['allof',
+                 ['anyof',
+                  ['ipcre', '(\\.jsx?|\\.eslintrc)$'],
+                  ['match', 'test-watch']],
+                 ['not', ['ipcre', '^node_modules', 'wholename']],
+                 ['not', ['ipcre', '^\\.#']]],
+    fields: ['name', 'exists'],
+  }
+  return subscribe({
+    watchman,
+    sub,
+    root,
+    name: 'lint',
+  })
+})
+
+process.stdin.resume()
+process.stdin.setEncoding('utf8')
+process.stdin.on('data', chunk => {
+  switch (chunk.trim()) {
+    case '':
+    case 'r':
+      procManager.schedule(() => runAllTests())
+      break
+    case 'l':
+      procManager.schedule(() => runLintAll())
+      break
+    case 'f raw':
+      testFormatter = false
+      console.log('Tests unformatted')
+      break
+    case 'f min':
+      testFormatter = tapMin()
+      console.log('Tests formatted using tap-min')
+      break
+    case 'f faucet':
+      testFormatter = buildFaucet()
+      console.log('Tests formatted using faucet')
+      break
+    case 'q':
+      console.log('exiting...')
+      process.exit(0)
+      break
+    default:
+      console.log({ chunk })
+  }
+})
