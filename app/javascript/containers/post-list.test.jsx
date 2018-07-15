@@ -17,10 +17,10 @@ test('containers/PostList', suite => {
           body: 'foo bar',
           timestamp: new Date(),
         },
-      ]
+      ],
     }))
 
-    const wrapper = shallow(<PostListContainer/>, { context: { store } })
+    const wrapper = shallow(<PostListContainer />, { context: { store } })
     const component = wrapper.find('PostList')
     t.ok(component)
 

@@ -1,31 +1,31 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import moment from 'moment'
+import Moment from 'moment'
 
 class Timestamp extends React.Component {
-  constructor(props) {
-    super(props)
-    let mo = moment(this.props.timestamp)
-    this.state = {
-      moment: mo,
-      text: mo.fromNow(),
-    }
+  static propTypes = {
+    updateInterval: PropTypes.number,
+    timestamp: PropTypes.oneOfType([
+      PropTypes.instanceOf(Date),
+      PropTypes.instanceOf(Moment),
+    ]).isRequired,
   }
 
   static defaultProps = {
     updateInterval: 30000,
   }
 
-  static propTypes = {
-    updateInterval: PropTypes.number.isRequired,
-    timestamp: PropTypes.oneOfType([
-      PropTypes.instanceOf(Date),
-      PropTypes.instanceOf(moment),
-    ]).isRequired,
+  constructor(props) {
+    super(props)
+    this.moment = Moment(props.timestamp)
+    this.state = {
+      text: this.moment.fromNow(),
+    }
   }
 
   componentDidMount() {
-    this.timerId = setInterval(() => this.tick(), this.props.updateInterval)
+    const { updateInterval } = this.props
+    this.timerId = setInterval(() => this.tick(), updateInterval)
   }
 
   componentWillUnmount() {
@@ -34,14 +34,16 @@ class Timestamp extends React.Component {
 
   tick() {
     this.setState({
-      text: this.state.moment.fromNow(),
+      text: this.moment.fromNow(),
     })
   }
 
   render() {
+    const { timestamp } = this.props
+    const { text } = this.state
     return (
-      <abbr title={this.props.timestamp.toString()} className="timestamp">
-        {this.state.text}
+      <abbr title={timestamp.toString()} className="timestamp">
+        {text}
       </abbr>
     )
   }

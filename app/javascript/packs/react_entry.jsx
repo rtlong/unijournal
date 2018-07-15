@@ -4,7 +4,7 @@ import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 
 import App from '../app'
-import reducer from '../reducer'
+import reducer, { initialState } from '../reducer'
 
 // given window.pageState, convert values as needed
 function convertPageState(pageState) {
@@ -12,20 +12,21 @@ function convertPageState(pageState) {
     posts: pageState.posts.map(p => ({
       ...p,
       timestamp: new Date(p.timestamp),
-    }))
+    })),
   })
 }
 
 let store
 
 document.addEventListener('DOMContentLoaded', () => {
-  let initialState = Object.assign({}, reducer.initialState, convertPageState(window.pageState))
-  store = createStore(reducer, initialState,
+  const state = Object.assign({}, initialState, convertPageState(window.pageState))
+  store = createStore(reducer, state,
+                      // eslint-disable-next-line no-underscore-dangle
                       window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 
   ReactDOM.render(
     <Provider store={store}>
-      <App posts={store.getState().posts}/>
+      <App posts={store.getState().posts} />
     </Provider>,
     document.body.appendChild(document.createElement('div')),
   )
