@@ -1,0 +1,138 @@
+#!/usr/bin/env node -r babel-register
+
+import path from 'path'
+import { spawn } from 'child_process'
+import Faucet from 'faucet'
+import Watchman from 'fb-watchman'
+
+let useFaucet = true
+const watchman = new Watchman.Client()
+
+const init = promisify(cb => watchman.capabilityCheck({optional: [], required: ['term-ipcre']}, cb))
+      .catch(err => {
+        console.error(error)
+        watchman.end()
+        throw(err)
+      })
+      // .then(resp => console.log(resp))
+
+const root = path.dirname(__dirname)
+
+const watchProject = init
+  .then(() => promisify(cb => watchman.command(['watch-project', root], cb)))
+  .then(resp => {
+    if ('warning' in resp) {
+      console.log('warning: ', resp.warning)
+    }
+    console.log('watch established on', resp.watch)
+    return resp
+  })
+  .catch(error => {
+    console.error('Error creating watch:', error)
+  })
+
+watchProject
+  .then(watchResp => {
+    const sub = {
+      expression: [
+        'allof',
+        ['ipcre', '.jsx?$'],
+        ['not',
+         ['ipcre', '^node_modules', 'wholename']],
+        ['not',
+         ['ipcre', '^\.#']],
+      ],
+      fields: ['name', 'exists'],
+    }
+    return promisify(cb => watchman.command(['subscribe', watchResp.watch, 'js', sub], cb))
+  })
+  .then(resp => {
+    if ('warning' in resp) {
+      console.log('warning: ', resp.warning)
+    }
+  })
+  .catch(error => {
+    console.error('Error creating subscription:', error)
+  })
+
+watchman.on('subscription', event => {
+  if (event.subscription !== 'js') return
+
+  const testFiles = []
+
+  const runAll = event.files.some(file => {
+    const isTestFile = testFilePattern.test(file.name)
+    if (!isTestFile) return true // if event includes any non-tests, short-circuit .some() to exit iteration and runAll = true
+    if (file.exists) testFiles.push(file.name) // still existing test file, add to list
+  })
+
+  if (runAll) {
+    runAllTests()
+  } else {
+    runTape(testFiles)
+  }
+})
+
+process.stdin.resume()
+process.stdin.setEncoding('utf8')
+process.stdin.on('data', chunk => {
+  switch(chunk.trim()) {
+  case '':
+  case 'r':
+    runAllTests()
+    break;
+  case 'f':
+    useFaucet = !useFaucet
+    console.log('Faucet output is', useFaucet ? 'on' : 'off')
+    break;
+  case 'q':
+    console.log('exiting...')
+    process.exit(0)
+    break;
+  default:
+    console.log({ chunk })
+  }
+})
+
+const testFilePattern = /\.test\.jsx?$/
+
+function runTape(testFiles) {
+  const cmd = ['node_modules/.bin/tape', '-r', 'babel-register', ...testFiles]
+  console.log('Running Tape', ...testFiles)
+  // run Tape process
+  const tape = spawn(process.execPath, cmd, { stdio: ['ignore', 'pipe', process.stderr] })
+        .on('error', err => {
+          console.error('error spawning `tape`', err)
+        })
+        .on('exit', code => {
+          console.error('Tape exited', code)
+        })
+
+  let stdout = tape.stdout
+  // pipe output through faucet and to stdout
+  if (useFaucet) {
+    const faucet = Faucet({
+      width: process.stdout.isTTY ? process.stdout.columns - 5 : 0,
+    })
+    stdout = stdout.pipe(faucet)
+  }
+  stdout.pipe(process.stdout)
+}
+
+function runAllTests() {
+  runTape(['app/javascript/**/*.test.js?(x)'])
+}
+
+function promisify(fn) {
+  return new Promise((resolve, reject) => {
+    const cb = (error, response) => {
+      // console.log({error, response})
+      if (error) {
+        reject(error)
+      } else {
+        resolve(response)
+      }
+    }
+    fn(cb)
+  })
+}
