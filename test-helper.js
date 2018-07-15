@@ -39,4 +39,12 @@ export function mock() {
   return m
 }
 
+// MONKEY-PATCH: for 'subtests', prepend parent test name
+const originalSubTest = test.Test.prototype.test
+test.Test.prototype.test = function(name, opts, cb) {
+  name = this.name + ' / ' + name
+  originalSubTest.apply(this, [name, opts, cb])
+}
+// END MONKEY-PATCH
+
 export { test }

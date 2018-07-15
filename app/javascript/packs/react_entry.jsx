@@ -5,7 +5,6 @@ import { Provider } from 'react-redux'
 
 import App from '../app'
 import reducer from '../reducer'
-import { addPost } from '../actions'
 
 // given window.pageState, convert values as needed
 function convertPageState(pageState) {

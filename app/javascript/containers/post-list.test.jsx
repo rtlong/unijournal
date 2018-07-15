@@ -9,22 +9,24 @@ import PostListContainer from './post-list'
 const middlewares = []
 const mockStore = configureStore(middlewares)
 
-test('containers/PostList / state', t => {
-  const store = mockStore(Object.assign({}, initialState, {
-    posts: [
-      {
-        body: 'foo bar',
-        timestamp: new Date(),
-      },
-    ]
-  }))
+test('containers/PostList', suite => {
+  suite.test('state', t => {
+    const store = mockStore(Object.assign({}, initialState, {
+      posts: [
+        {
+          body: 'foo bar',
+          timestamp: new Date(),
+        },
+      ]
+    }))
 
-  const wrapper = shallow(<PostListContainer/>, { context: { store } })
-  const component = wrapper.find('PostList')
-  t.ok(component)
+    const wrapper = shallow(<PostListContainer/>, { context: { store } })
+    const component = wrapper.find('PostList')
+    t.ok(component)
 
-  const state = store.getState()
-  t.deepEqual(component.prop('posts'), state.posts)
+    const state = store.getState()
+    t.deepEqual(component.prop('posts'), state.posts)
 
-  t.end()
+    t.end()
+  })
 })
