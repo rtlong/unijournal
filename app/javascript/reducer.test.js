@@ -1,13 +1,13 @@
 import { test } from '../../test-helper'
 import reducer, { initialState } from './reducer'
-import ACTIONS, * as actions from './actions'
+import ACTIONS from './actions'
 
 test('reducer', suite => {
   suite.test('NEW_POST_SOURCE_CHANGED', t => {
-    let state0 = {...initialState}
+    const state0 = { ...initialState }
     state0.newPostForm.source = ''
 
-    let action = {
+    const action = {
       type: ACTIONS.NEW_POST_SOURCE_CHANGED,
       value: 'foo',
     }
@@ -24,10 +24,10 @@ test('reducer', suite => {
   })
 
   suite.test('NEW_POST_FORM_EXPAND', t => {
-    let state0 = {...initialState}
+    const state0 = { ...initialState }
     state0.newPostForm.expanded = true
 
-    let action = {
+    const action = {
       type: ACTIONS.NEW_POST_FORM_EXPAND,
       value: false,
     }
@@ -37,25 +37,25 @@ test('reducer', suite => {
       newPostForm: {
         ...state0.newPostForm,
         expanded: false,
-      }
+      },
     })
 
     t.end()
   })
 
   suite.test('ADD_POST', t => {
-    let state0 = {
+    const state0 = {
       ...initialState,
       posts: [],
     }
     state0.newPostForm.source = 'some text that was entered'
 
-    let action1 = {
+    const action1 = {
       type: ACTIONS.ADD_POST,
       body: null,
       timestamp: new Date(),
     }
-    let state1 = reducer(state0, action1)
+    const state1 = reducer(state0, action1)
     t.deepEqual(state1, {
       ...state0,
       posts: [
@@ -70,12 +70,12 @@ test('reducer', suite => {
       },
     })
 
-    let action2 = {
+    const action2 = {
       type: ACTIONS.ADD_POST,
       body: 'some value explicitly provided to the action',
       timestamp: new Date(),
     }
-    let state2 = reducer(state1, action2)
+    const state2 = reducer(state1, action2)
     t.deepEqual(state2, {
       ...state0,
       posts: [
@@ -96,5 +96,4 @@ test('reducer', suite => {
 
     t.end()
   })
-
 })

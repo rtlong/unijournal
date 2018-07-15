@@ -7,11 +7,11 @@ configureEnzyme({ adapter: new EnzymeReactAdapter() })
 
 function copyProps(src, target) {
   const props = Object.getOwnPropertyNames(src)
-        .filter(prop => typeof target[prop] === 'undefined')
-        .reduce((result, prop) => ({
-          ...result,
-          [prop]: Object.getOwnPropertyDescriptor(src, prop),
-        }), {})
+    .filter(prop => typeof target[prop] === 'undefined')
+    .reduce((result, prop) => ({
+      ...result,
+      [prop]: Object.getOwnPropertyDescriptor(src, prop),
+    }), {})
   Object.defineProperties(target, props)
 }
 
@@ -30,9 +30,9 @@ export function jsdomInit() {
 }
 
 export function mock() {
-  let m = function () {
+  const m = function mockedFunc(...args) {
     m.called = true
-    m.args = Array.from(arguments)
+    m.args = args
   }
   m.called = false
   m.args = null
@@ -41,9 +41,9 @@ export function mock() {
 
 // MONKEY-PATCH: for 'subtests', prepend parent test name
 const originalSubTest = test.Test.prototype.test
-test.Test.prototype.test = function(name, opts, cb) {
-  name = this.name + ' / ' + name
-  originalSubTest.apply(this, [name, opts, cb])
+test.Test.prototype.test = function testWithNameInheritance(name, opts, cb) {
+  const joinedName = `${this.name} / ${name}`
+  originalSubTest.apply(this, [joinedName, opts, cb])
 }
 // END MONKEY-PATCH
 

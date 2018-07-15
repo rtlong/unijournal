@@ -3,11 +3,11 @@ const ACTIONS = {};
   'ADD_POST',
   'NEW_POST_FORM_EXPAND',
   'NEW_POST_SOURCE_CHANGED',
-].forEach(sym => ACTIONS[sym] = sym)
+].forEach(sym => { ACTIONS[sym] = sym })
 
 export default ACTIONS
 
-export function addPost(body=null) {
+export function addPost(body = null) {
   return {
     type: ACTIONS.ADD_POST,
     body,

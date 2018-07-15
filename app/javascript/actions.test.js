@@ -1,7 +1,6 @@
 import { test } from '../../test-helper'
 import ACTIONS, {
   addPost,
-  newPostFormSetExpanded,
   newPostFormOpen,
   newPostFormClose,
   newPostSourceChanged,
@@ -40,12 +39,9 @@ test('actions', suite => {
   })
 
   suite.test('newPostSourceChanged', t => {
-    let action
-
-    action = newPostSourceChanged('foo bar')
+    const action = newPostSourceChanged('foo bar')
     t.equal(action.type, ACTIONS.NEW_POST_SOURCE_CHANGED)
     t.equal(action.value, 'foo bar')
-
     t.end()
   })
 })

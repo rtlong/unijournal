@@ -1,4 +1,3 @@
-import React from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
@@ -10,7 +9,7 @@ import {
 } from '../actions'
 import NewPost from '../components/new-post'
 
-const mapStateToProps = (state) => {
+function mapStateToProps(state) {
   return state.newPostForm
 }
 
