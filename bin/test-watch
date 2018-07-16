@@ -10,6 +10,29 @@ const testFilePattern = /\.test\.jsx?$/
 
 let testFormatter = tapMin
 
+function buildFaucet() {
+  return Faucet({
+    width: process.stdout.isTTY ? process.stdout.columns - 5 : 0,
+  })
+}
+
+function setTestFormatter(formatter) {
+  testFormatter = formatter
+  switch (formatter) {
+    case tapMin:
+      console.log('Tests formatted using tap-min')
+      break
+    case buildFaucet:
+      console.log('Tests formatted using faucet')
+      break
+    case false:
+      console.log('Tests unformatted')
+      break
+    default:
+      throw new Error(`Unknown test formatter ${formatter}`)
+  }
+}
+
 function runLinter(files) {
   return new Promise((resolve, reject) => {
     const cmd = ['node_modules/.bin/eslint', '--ext', 'js,jsx', ...files]
@@ -149,12 +172,6 @@ class ProcessManager {
   }
 }
 
-function buildFaucet() {
-  return Faucet({
-    width: process.stdout.isTTY ? process.stdout.columns - 5 : 0,
-  })
-}
-
 const root = path.dirname(__dirname)
 const procManager = new ProcessManager()
 
@@ -208,23 +225,32 @@ process.stdin.setEncoding('utf8')
 process.stdin.on('data', chunk => {
   switch (chunk.trim()) {
     case '':
-    case 'r':
+    case 't':
       procManager.schedule(() => runAllTests())
       break
     case 'l':
       procManager.schedule(() => runLintAll())
       break
+    case 'f':
+      switch (testFormatter) {
+        case false:
+          setTestFormatter(buildFaucet)
+          break
+        case tapMin:
+          setTestFormatter(false)
+          break
+        default:
+          setTestFormatter(tapMin)
+      }
+      break
     case 'f raw':
-      testFormatter = false
-      console.log('Tests unformatted')
+      setTestFormatter(false)
       break
     case 'f min':
-      testFormatter = tapMin
-      console.log('Tests formatted using tap-min')
+      setTestFormatter(tapMin)
       break
     case 'f faucet':
-      testFormatter = buildFaucet
-      console.log('Tests formatted using faucet')
+      setTestFormatter(buildFaucet)
       break
     case 'q':
       console.log('exiting...')
