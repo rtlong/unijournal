@@ -36,17 +36,18 @@ test('components/Timestamp', suite => {
   })
 
   suite.test('updates itself', async t => {
-    const timestamp = moment().subtract(44, 'seconds') // moment splits from 'a few seconds ago' to 'a minute ago' at 45 seconds
-    const component = shallow(<Timestamp timestamp={timestamp} updateInterval={250} />)
+    const thresh = moment.relativeTimeThreshold('s')
+    const timestamp = moment().subtract(thresh - 1, 'seconds')
 
-    t.equal(component.text(), 'a few seconds ago',
-            'shows "a few seconds ago" for 44 seconds ago')
+    const component = shallow(<Timestamp timestamp={timestamp} />)
 
-    await delay(1100) // wait over a second. moment output will be different and several tick()'s should have occured to update the component
+    const text0 = component.text()
+
+    await delay(1100) // wait over a second. moment output will be different and tick() should have occured to update the component
     component.update() // ask Enzyme to update it's rendered state, which seems neccesary for some reason
 
-    t.equal(component.text(), 'a minute ago',
-            'updates self to "a minute ago" for 45 seconds ago')
+    t.notEqual(text0, component.text(),
+               'updates text over time')
 
     component.unmount() // unmount to clearInterval so test doesn't hang
   })
