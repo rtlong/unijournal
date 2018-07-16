@@ -8,14 +8,17 @@ test('components/PostList', suite => {
   suite.test('looks correct', t => {
     const posts = [
       {
+        id: 0,
         body: 'foo bar',
         timestamp: new Date(),
       },
       {
+        id: 1,
         body: 'bar crawl',
         timestamp: new Date(),
       },
     ]
+
     const component = shallow(<PostList posts={posts} />)
     const postComponents = component.find('Post')
 
@@ -23,7 +26,7 @@ test('components/PostList', suite => {
 
     posts.forEach((post, i) => {
       const postComponent = postComponents.at(i)
-      t.equal(postComponent.key(), i.toString())
+      t.equal(postComponent.key(), post.id.toString())
       t.deepEqual(postComponent.props(), post)
     })
 

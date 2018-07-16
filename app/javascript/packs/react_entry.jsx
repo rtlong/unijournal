@@ -6,15 +6,15 @@ import { Provider } from 'react-redux'
 
 import App from '../app'
 import reducer from '../reducer'
+import * as Posts from '../entities/posts'
 
 // given window.pageState, convert values as needed
-function convertPageState(pageState) {
-  return Object.assign({}, pageState, {
-    posts: pageState.posts.map(p => ({
-      ...p,
-      timestamp: new Date(p.timestamp),
-    })),
-  })
+function convertPageState(pageState = undefined) {
+  if (!pageState) return {}
+  return {
+    ...pageState,
+    posts: Posts.replace(pageState.posts),
+  }
 }
 
 function setupStore() {

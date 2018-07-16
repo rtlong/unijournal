@@ -4,6 +4,7 @@ class IndexController < ApplicationController
     @client_state = {
       posts: posts.map { |p|
         {
+          id: p.id,
           body: p.body,
           timestamp: p.created_at,
         }

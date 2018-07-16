@@ -1,41 +1,18 @@
 import { combineReducers } from 'redux'
 
 import ACTIONS from './actions'
+import * as Posts from './entities/posts'
 
-export const initialState = {
-  posts: [],
-  newPostForm: {
-    source: '',
-    expanded: false,
-  },
-}
-
-function complexReducer(state = initialState, action) {
-  switch (action.type) {
+function posts(state = Posts.empty, { type, payload }) {
+  switch (type) {
     case ACTIONS.ADD_POST:
-      return {
-        ...state,
-        posts: [
-          ...state.posts,
-          {
-            body: action.body || state.newPostForm.source,
-            timestamp: action.timestamp,
-          },
-        ],
-      }
+      return Posts.add(state, payload)
     default:
       return state
   }
 }
 
-function posts(state = initialState.posts, action) {
-  switch (action.type) {
-    default:
-      return state
-  }
-}
-
-function newPostForm(state = initialState.newPostForm, action) {
+function newPostForm(state = { source: '', expanded: false }, action) {
   switch (action.type) {
     case ACTIONS.ADD_POST:
       return {
@@ -46,13 +23,13 @@ function newPostForm(state = initialState.newPostForm, action) {
     case ACTIONS.NEW_POST_FORM_EXPAND:
       return {
         ...state,
-        expanded: action.value,
+        expanded: action.payload,
       }
 
     case ACTIONS.NEW_POST_SOURCE_CHANGED:
       return {
         ...state,
-        source: action.value,
+        source: action.payload,
       }
 
     default:
@@ -60,12 +37,11 @@ function newPostForm(state = initialState.newPostForm, action) {
   }
 }
 
-export default function reducer(state, action) {
-  return [
-    complexReducer,
-    combineReducers({
-      posts,
-      newPostForm,
-    }),
-  ].reduce((s, r) => r(s, action), state)
-}
+export default combineReducers({
+  posts,
+  newPostForm,
+})
+/* export default function reducer(state, action) {
+ *   return [
+ *   ].reduce((s, r) => r(s, action), state)
+ * } */

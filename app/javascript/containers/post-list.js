@@ -1,10 +1,11 @@
 import { connect } from 'react-redux'
 
 import PostList from '../components/post-list'
+import * as Posts from '../entities/posts'
 
 function mapStateToProps(state) {
   return {
-    posts: state.posts,
+    posts: Posts.all(state.posts),
   }
 }
 
