@@ -2,29 +2,33 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Markdown from 'react-markdown'
 
-import Link from './link'
+import Button from './button'
 
-const NewPost = props => {
+const NewPost = ({ expanded, source, onOpen, onCancel, onChange, onSubmit }) => {
   let input
-  const onSubmit = e => {
+  const submit = e => {
     e.preventDefault()
-    props.onSubmit()
+    onSubmit()
   }
 
-  return props.expanded ? (
+  return expanded ? (
     <div>
-      <Link label="Close" onClick={props.onCancel} />
+      <Button label="Close" onClick={onCancel} />
       <div>
-        <form onSubmit={onSubmit}>
-          <textarea value={props.source} onChange={e => props.onChange(e.target.value)} />
+        <form onSubmit={submit}>
+          <textarea value={source} onChange={({ target }) => onChange(target.value)} />
           <input type="submit" />
         </form>
-        <Markdown source={props.source} />
+        <Markdown source={source} />
       </div>
     </div>
   ) : (
-    <Link label="New Post" onClick={props.onOpen} />
+    <Button label="New Post" onClick={onOpen} />
   )
+}
+
+NewPost.defaultProps = {
+  source: '',
 }
 
 NewPost.propTypes = {

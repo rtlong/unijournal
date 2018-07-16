@@ -57,8 +57,17 @@
         ],
         "optionalDependencies": false
       }
-    ]
+    ],
+    "react/no-array-index-key": "warn"
   },
+  "overrides": [
+    {
+      "files": ["**/*.test.{js,jsx}"],
+      "rules": {
+        "react/destructuring-assignment": "off"
+      }
+    }
+  ],
   "env": {
     "node": true,
   },

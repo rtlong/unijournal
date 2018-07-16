@@ -21,11 +21,11 @@ test('components/PostList', suite => {
 
     t.equal(postComponents.length, posts.length)
 
-    for (let i = 0; i < posts.length; i++) {
-      const post = postComponents.at(i)
-      t.equal(post.key(), i.toString())
-      t.deepEqual(post.props(), posts[i])
-    }
+    posts.forEach((post, i) => {
+      const postComponent = postComponents.at(i)
+      t.equal(postComponent.key(), i.toString())
+      t.deepEqual(postComponent.props(), post)
+    })
 
     t.end()
   })

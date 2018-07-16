@@ -2,9 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Post from './post'
 
-const PostList = props => (
+const PostList = ({ posts }) => (
   <div>
-    {props.posts.map((post, id) => (
+    {posts.map((post, id) => (
       <Post key={id} {...post} />
     ))}
   </div>

@@ -1,10 +1,9 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
 import PostList from './containers/post-list'
 import NewPost from './containers/new-post'
 
-const App = props => (
+const App = () => (
   <div>
     <h1>
       Journal

@@ -3,7 +3,6 @@ import { shallow, mount } from 'enzyme'
 
 import { test, mock, jsdomInit } from '../../../test-helper'
 import NewPost from './new-post'
-import Link from './link'
 
 function buildComponentProps(opts) {
   return Object.assign({
@@ -20,10 +19,10 @@ test('components/NewPost', suite => {
   suite.test('[expanded=false]', t => {
     const props = buildComponentProps({ expanded: false })
     const component = shallow(<NewPost {...props} />)
-    // t.ok(component.is(Link),
-    //      'is a <Link>')
+    t.ok(component.is('Button'),
+         'is a <Button>')
     t.equal(component.prop('onClick'), props.onOpen,
-            'Link\'s onClick is onOpen')
+            'Button\'s onClick is onOpen')
     t.end()
   })
 
@@ -42,9 +41,9 @@ test('components/NewPost', suite => {
     t.equal(markdown.prop('source'), source,
             'contains a <ReactMarkdown> whose @source is @source')
 
-    const link = component.find('Link')
-    t.equal(link.prop('onClick'), props.onCancel,
-            '@onCancel is attached to a <Link>')
+    const button = component.find('Button')
+    t.equal(button.prop('onClick'), props.onCancel,
+            '@onCancel is attached to a <Button>')
 
     const textarea = component.find('textarea')
     t.equal(textarea.length, 1,

@@ -1,5 +1,5 @@
 import React from 'react'
-import { shallow, mount } from 'enzyme'
+import { shallow } from 'enzyme'
 import Markdown from 'react-markdown'
 
 import { test } from '../../../test-helper'

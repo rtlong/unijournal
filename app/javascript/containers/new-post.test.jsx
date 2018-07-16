@@ -15,6 +15,10 @@ import NewPostContainer from './new-post'
 const middlewares = []
 const mockStore = configureStore(middlewares)
 
+function buildState(state, actions) {
+  return actions.reduce(reducer, state)
+}
+
 test('containers/NewPost', suite => {
   suite.test('dispatch', t => {
     const store = mockStore(initialState)
@@ -53,15 +57,11 @@ test('containers/NewPost', suite => {
     const component = wrapper.find('NewPost')
     t.ok(component)
 
-    const state = store.getState()
-    // t.comment(JSON.stringify(state))
-    t.equal(component.prop('expanded'), true)
-    t.equal(component.prop('source'), 'foo')
+    const { newPostForm: state } = store.getState()
+    /* t.comment(JSON.stringify(state)) */
+    t.equal(component.prop('expanded'), state.expanded)
+    t.equal(component.prop('source'), state.source)
 
     t.end()
   })
 })
-
-function buildState(initialState, actions) {
-  return actions.reduce(reducer, initialState)
-}
