@@ -1,10 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { createStore } from 'redux'
+import { createStore, compose, applyMiddleware } from 'redux'
+import ReduxThunk from 'redux-thunk'
 import { Provider } from 'react-redux'
 
 import App from '../app'
-import reducer, { initialState } from '../reducer'
+import reducer from '../reducer'
 
 // given window.pageState, convert values as needed
 function convertPageState(pageState) {
@@ -16,14 +17,16 @@ function convertPageState(pageState) {
   })
 }
 
-let store
+function setupStore() {
+  const state = convertPageState(window.pageState)
 
+  // eslint-disable-next-line no-underscore-dangle
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+
+  return createStore(reducer, state, composeEnhancers(applyMiddleware(ReduxThunk)))
+}
 document.addEventListener('DOMContentLoaded', () => {
-  const state = Object.assign({}, initialState, convertPageState(window.pageState))
-  store = createStore(reducer, state,
-                      // eslint-disable-next-line no-underscore-dangle
-                      window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
-
+  const store = setupStore()
   ReactDOM.render(
     <Provider store={store}>
       <App posts={store.getState().posts} />

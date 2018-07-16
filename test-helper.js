@@ -2,6 +2,8 @@ import EnzymeReactAdapter from 'enzyme-adapter-react-16'
 import { configure as configureEnzyme } from 'enzyme'
 import test from 'blue-tape'
 import { JSDOM } from 'jsdom'
+import configureStore from 'redux-mock-store'
+import ReduxThunk from 'redux-thunk'
 
 configureEnzyme({ adapter: new EnzymeReactAdapter() })
 
@@ -37,6 +39,10 @@ export function mock() {
   m.called = false
   m.args = null
   return m
+}
+
+export function mockStore(getState) {
+  return configureStore([ReduxThunk])(getState)
 }
 
 // MONKEY-PATCH: for 'subtests', prepend parent test name
