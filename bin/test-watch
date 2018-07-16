@@ -145,8 +145,10 @@ function setupWatchmanSubscriptionHandlers(watchman, scheduleProcess) {
       return false
     })
 
+    if (!runAll && testFiles.length === 0) return
     scheduleProcess(() => (runAll ? runAllTests() : runTape(testFiles)))
   })
+
   watchman.on('subscription', ({ subscription, files }) => {
     if (subscription !== 'lint') return
     const filesToLint = files
@@ -154,6 +156,7 @@ function setupWatchmanSubscriptionHandlers(watchman, scheduleProcess) {
       .map(f => (path.basename(f.name) === '.eslintrc'
                ? path.dirname(f.name)
                : f.name))
+    if (filesToLint.length === 0) return
     scheduleProcess(() => runLinter(filesToLint))
   })
 }
