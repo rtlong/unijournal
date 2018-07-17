@@ -38,9 +38,9 @@ export function update(posts, id, post) {
   }
 }
 
-export function replace(collection) {
+export function load(collection) {
   return collection.reduce((posts, serializedPost) => add(posts, {
     ...serializedPost,
-    timestamp: new Date(serializedPost.timestamp),
+    timestamp: new Date(serializedPost.created_at),
   }), empty)
 }

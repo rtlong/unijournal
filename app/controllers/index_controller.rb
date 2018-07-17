@@ -2,13 +2,7 @@ class IndexController < ApplicationController
   def index
     posts = Post.limit(10).order(:created_at).to_a
     @client_state = {
-      posts: posts.map { |p|
-        {
-          id: p.id,
-          body: p.body,
-          timestamp: p.created_at,
-        }
-      },
+      posts: posts.as_json,
     }
   end
   attr_reader :client_state

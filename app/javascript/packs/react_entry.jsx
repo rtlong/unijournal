@@ -10,10 +10,10 @@ import * as Posts from '../entities/posts'
 
 // given window.pageState, convert values as needed
 function convertPageState(pageState = undefined) {
-  if (!pageState) return {}
+  if (!pageState) return undefined
   return {
     ...pageState,
-    posts: Posts.replace(pageState.posts),
+    posts: Posts.load(pageState.posts),
   }
 }
 
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const store = setupStore()
   ReactDOM.render(
     <Provider store={store}>
-      <App posts={store.getState().posts} />
+      <App />
     </Provider>,
     document.body.appendChild(document.createElement('div')),
   )
