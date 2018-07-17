@@ -4,6 +4,11 @@ import Moment from 'moment'
 
 Moment.relativeTimeThreshold('ss', 3) // make it count up seconds until 45s
 
+function computeTextFromDate(date) {
+  const moment = Moment(date)
+  return moment.fromNow()
+}
+
 class Timestamp extends React.Component {
   static propTypes = {
     timestamp: PropTypes.oneOfType([
@@ -14,9 +19,8 @@ class Timestamp extends React.Component {
 
   constructor(props) {
     super(props)
-    this.moment = Moment(props.timestamp)
     this.state = {
-      text: this.computeText(),
+      text: computeTextFromDate(props.timestamp),
     }
   }
 
@@ -24,24 +28,29 @@ class Timestamp extends React.Component {
     this.scheduleNextTick()
   }
 
+  componentDidUpdate(prevProps) {
+    const { timestamp } = this.props
+    if (timestamp !== prevProps.timestamp) {
+      clearTimeout(this.timerId)
+      this.tick()
+    }
+  }
+
   componentWillUnmount() {
     clearTimeout(this.timerId)
   }
 
-  computeText() {
-    return this.moment.fromNow()
-  }
-
   tick() {
-    const text = this.computeText()
+    const { timestamp } = this.props
     this.setState({
-      text,
+      text: computeTextFromDate(timestamp),
     })
     this.scheduleNextTick()
   }
 
   scheduleNextTick() {
-    const diff = Moment().diff(this.moment)
+    const { moment } = this.state
+    const diff = Moment().diff(moment)
     const nextInterval = diff < 60000 ? 1000 : 10000
     this.timerId = setTimeout(() => this.tick(), nextInterval)
   }
