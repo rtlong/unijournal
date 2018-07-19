@@ -1,4 +1,4 @@
-import { test } from '../../test-helper'
+import test from 'tape'
 import reducer from './reducer'
 import ACTIONS from './actions'
 import * as Posts from './entities/posts'

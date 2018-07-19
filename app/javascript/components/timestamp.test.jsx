@@ -2,8 +2,8 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import moment from 'moment'
 import delay from 'delay'
+import test from 'tape'
 
-import { test } from '../../../test-helper'
 import Timestamp from './timestamp'
 
 test('components/Timestamp', suite => {

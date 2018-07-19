@@ -1,7 +1,6 @@
 import React from 'react'
 import { shallow } from 'enzyme'
-
-import { test } from '../../../test-helper'
+import test from 'tape'
 import PostList from './post-list'
 
 test('components/PostList', suite => {

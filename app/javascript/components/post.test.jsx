@@ -2,7 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import Markdown from 'react-markdown'
 
-import { test } from '../../../test-helper'
+import test from 'tape'
 import Post from './post'
 
 test('components/Post', suite => {

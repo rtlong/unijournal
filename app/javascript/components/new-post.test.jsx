@@ -1,7 +1,8 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
+import test from 'tape'
 
-import { test, mock, jsdomInit } from '../../../test-helper'
+import { mock, jsdomInit } from '../../../test-helper'
 import NewPost from './new-post'
 
 function buildComponentProps(opts) {

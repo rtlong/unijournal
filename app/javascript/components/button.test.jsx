@@ -1,7 +1,8 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
-import { test, jsdomInit } from '../../../test-helper'
+import test from 'tape'
+import { jsdomInit } from '../../../test-helper'
 import Button from './button'
 
 test('components/Button', suite => {

@@ -1,4 +1,5 @@
-import { test, mockStore } from '../../test-helper'
+import test from 'tape'
+import { mockStore } from '../../test-helper'
 import ACTIONS, {
   addPost,
   newPostFormOpen,
