@@ -7,17 +7,15 @@ import delay from 'delay'
 import Timestamp from './timestamp'
 
 describe('components/Timestamp', () => {
-  test('displays the moment.js relative string', () => {
-    const cases = [
+  describe('displays the moment.js relative string', () => {
+    [
       moment(),
       moment().subtract(1, 'minutes'),
       moment().subtract(2, 'minutes'),
       moment().subtract(1, 'hours'),
       moment().subtract(5, 'hours'),
       moment().subtract(5, 'days'),
-    ]
-
-    cases.forEach(timestamp => {
+    ].forEach(timestamp => {
       test(timestamp.fromNow(), () => {
         expect.assertions(3)
         const component = shallow(

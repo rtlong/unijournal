@@ -11,6 +11,17 @@ import reducer from './reducer'
 
 const initialState = reducer(undefined, { type: '@@redux/INIT-test' })
 
+function testSimpleActionCreator(actionCreator, expectedAction) {
+  test(actionCreator.name, async () => {
+    const store = mockStore(initialState)
+    await store.dispatch(actionCreator())
+    const actions = store.getActions()
+    expect(actions.length).toBe(1)
+    const action = actions[0]
+    expect(action).toEqual(expectedAction)
+  })
+}
+
 describe('actions', () => {
   describe.skip('createPost', () => {
     test('when newPostForm.source empty', async () => {
@@ -39,21 +50,15 @@ describe('actions', () => {
     })
   })
 
-  function testSimpleActionCreator(actionCreator, expectedAction) {
-    test(actionCreator.name, async () => {
-      const store = mockStore(initialState)
-      await store.dispatch(actionCreator())
-      const actions = store.getActions()
-      expect(actions.length).toBe(1)
-      const action = actions[0]
-      expect(action).toEqual(expectedAction)
-    })
-  }
-
   testSimpleActionCreator(() => addPost({ body: 'foo' }),
                           { type: ACTIONS.POSTS_ADD, payload: { body: 'foo' } })
-  testSimpleActionCreator(newPostFormClose, { type: ACTIONS.NEW_POST_FORM_EXPAND, payload: false })
-  testSimpleActionCreator(newPostFormOpen, { type: ACTIONS.NEW_POST_FORM_EXPAND, payload: true })
+
+  testSimpleActionCreator(newPostFormClose,
+                          { type: ACTIONS.NEW_POST_FORM_EXPAND, payload: false })
+
+  testSimpleActionCreator(newPostFormOpen,
+                          { type: ACTIONS.NEW_POST_FORM_EXPAND, payload: true })
+
   testSimpleActionCreator(() => newPostSourceChanged('foo bar'),
                           { type: ACTIONS.NEW_POST_SOURCE_CHANGED, payload: 'foo bar' })
 })

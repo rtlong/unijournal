@@ -1,11 +1,13 @@
 import EnzymeReactAdapter from 'enzyme-adapter-react-16'
 import { configure as configureEnzyme } from 'enzyme'
-import test from 'blue-tape'
 import { JSDOM } from 'jsdom'
 import configureStore from 'redux-mock-store'
 import ReduxThunk from 'redux-thunk'
 
-configureEnzyme({ adapter: new EnzymeReactAdapter() })
+beforeAll(() => {
+  configureEnzyme({ adapter: new EnzymeReactAdapter() })
+})
+
 
 function copyProps(src, target) {
   const props = Object.getOwnPropertyNames(src)
@@ -44,13 +46,3 @@ export function mock() {
 export function mockStore(getState) {
   return configureStore([ReduxThunk])(getState)
 }
-
-// MONKEY-PATCH: for 'subtests', prepend parent test name
-const originalSubTest = test.Test.prototype.test
-test.Test.prototype.test = function testWithNameInheritance(name, opts, cb) {
-  const joinedName = `${this.name} / ${name}`
-  originalSubTest.apply(this, [joinedName, opts, cb])
-}
-// END MONKEY-PATCH
-
-export { test }

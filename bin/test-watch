@@ -2,32 +2,9 @@
 
 import path from 'path'
 import { spawn } from 'child_process'
-import Faucet from 'faucet'
 import Watchman from 'fb-watchman'
 
 const testFilePattern = /\.test\.jsx?$/
-
-function buildFaucet() {
-  return Faucet({
-    width: process.stdout.isTTY ? process.stdout.columns - 5 : 0,
-  })
-}
-
-let testFormatter = buildFaucet
-
-function setTestFormatter(formatter) {
-  testFormatter = formatter
-  switch (formatter) {
-    case buildFaucet:
-      console.log('Tests formatted using faucet')
-      break
-    case false:
-      console.log('Tests unformatted')
-      break
-    default:
-      throw new Error(`Unknown test formatter ${formatter}`)
-  }
-}
 
 function runLinter(files) {
   return new Promise((resolve, reject) => {
@@ -52,29 +29,21 @@ function runLintAll() {
 function runTestProcess(testFiles) {
   return new Promise((resolve, reject) => {
     const cmd = ['node_modules/.bin/jest', ...testFiles]
-    console.log('Running Tape', ...testFiles)
-    // run Tape process
-    const tape = spawn(process.execPath, cmd, { stdio: ['ignore', 'pipe', process.stderr] })
+    console.log('Running tests', ...testFiles)
+    spawn(process.execPath, cmd, { stdio: ['ignore', process.stdout, process.stderr] })
       .on('error', err => {
         console.error(`error spawning ${cmd[0]}`, err)
         reject(err)
       })
       .on('exit', code => {
-        console.error(`Tape exited ${code}`)
+        console.error(`Tests exited ${code}`)
         return resolve()
       })
-
-    let { stdout } = tape
-    // pipe output through faucet and to stdout
-    if (testFormatter) {
-      stdout = stdout.pipe(testFormatter())
-    }
-    stdout.pipe(process.stdout)
   })
 }
 
 function runAllTests() {
-  return runTestProcess(['app/javascript/**/*.test.js?(x)'])
+  return runTestProcess([])
 }
 
 function promisify(fn) {
@@ -229,21 +198,6 @@ process.stdin.on('data', chunk => {
       break
     case 'l':
       procManager.schedule(() => runLintAll())
-      break
-    case 'f':
-      switch (testFormatter) {
-        case false:
-          setTestFormatter(buildFaucet)
-          break
-        default:
-          setTestFormatter(false)
-      }
-      break
-    case 'f raw':
-      setTestFormatter(false)
-      break
-    case 'f faucet':
-      setTestFormatter(buildFaucet)
       break
     case 'q':
       console.log('exiting...')
