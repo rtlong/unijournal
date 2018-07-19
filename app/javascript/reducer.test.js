@@ -1,14 +1,14 @@
-import test from 'tape'
+import expect from 'expect'
 import reducer from './reducer'
 import ACTIONS from './actions'
 import * as Posts from './entities/posts'
 import * as Messages from './entities/messages'
 
-test('reducer', () => {
+describe('reducer', () => {
   const initialState = reducer(undefined, { type: 'INIT' })
 
-  test('initialState', t => {
-    t.deepEqual(initialState, {
+  test('initialState', () => {
+    expect(initialState).toEqual({
       newPostForm: {
         source: '',
         expanded: false,
@@ -16,11 +16,9 @@ test('reducer', () => {
       posts: Posts.empty,
       messages: Messages.empty,
     })
-
-    t.end()
   })
 
-  test('NEW_POST_SOURCE_CHANGED', t => {
+  test('NEW_POST_SOURCE_CHANGED', () => {
     const state0 = { ...initialState }
     state0.newPostForm.source = ''
 
@@ -29,18 +27,16 @@ test('reducer', () => {
       payload: 'foo',
     }
 
-    t.deepEqual(reducer(state0, action), {
+    expect(reducer(state0, action)).toEqual({
       ...state0,
       newPostForm: {
         ...state0.newPostForm,
         source: 'foo',
       },
     })
-
-    t.end()
   })
 
-  test('NEW_POST_FORM_EXPAND', t => {
+  test('NEW_POST_FORM_EXPAND', () => {
     const state0 = { ...initialState }
     state0.newPostForm.expanded = true
 
@@ -49,18 +45,16 @@ test('reducer', () => {
       payload: false,
     }
 
-    t.deepEqual(reducer(state0, action), {
+    expect(reducer(state0, action)).toEqual({
       ...state0,
       newPostForm: {
         ...state0.newPostForm,
         expanded: false,
       },
     })
-
-    t.end()
   })
 
-  test('ADD_POST', t => {
+  test('ADD_POST', () => {
     const state0 = { ...initialState }
     state0.newPostForm.source = 'some text to make sure we clear'
 
@@ -72,8 +66,8 @@ test('reducer', () => {
       },
     }
     const state1 = reducer(state0, action1)
-    t.equal(state1.newPostForm.source, '')
-    t.deepEqual(Posts.all(state1.posts), [
+    expect(state1.newPostForm.source).toBe('')
+    expect(Posts.all(state1.posts)).toEqual([
       {
         ...action1.payload,
         id: 0,
@@ -88,8 +82,8 @@ test('reducer', () => {
       },
     }
     const state2 = reducer(state1, action2)
-    t.equal(state2.newPostForm.source, '')
-    t.deepEqual(Posts.all(state2.posts), [
+    expect(state2.newPostForm.source).toBe('')
+    expect(Posts.all(state2.posts)).toEqual([
       {
         ...action1.payload,
         id: 0,
@@ -99,6 +93,5 @@ test('reducer', () => {
         id: 1,
       },
     ])
-    t.end()
   })
 })

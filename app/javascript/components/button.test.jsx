@@ -1,19 +1,18 @@
+import expect from 'expect'
 import React from 'react'
-import { shallow, mount } from 'enzyme'
 
-import test from 'tape'
+import { shallow, mount } from 'enzyme'
 import { jsdomInit } from '../../../test-helper'
 import Button from './button'
 
-test('components/Button', () => {
-  test('looks correct', t => {
+describe('components/Button', () => {
+  test('looks correct', () => {
     const text = 'Some text.'
     const component = shallow(<Button label={text} />)
-    t.equal(component.text(), text, 'text() matches @label')
-    t.end()
+    expect(component.text()).toBe(text)
   })
 
-  test('registers the onClick handler', t => {
+  test('registers the onClick handler', () => {
     const text = 'Some text.'
     let clicked = false
     const onClick = e => { clicked = e }
@@ -21,35 +20,28 @@ test('components/Button', () => {
     jsdomInit()
     const component = mount(<Button label={text} onClick={onClick} />)
 
-    t.false(clicked,
-            'onClick has not fired before being clicked')
+    expect(clicked).toBeFalsy()
 
     component.find('button').simulate('click')
 
-    t.true(clicked,
-           'onClick has fired after being clicked')
+    expect(clicked).toBeTruthy()
 
-    t.equal(clicked.target.outerHTML, component.html(),
-            'onClick is fired with the event')
-
-    t.end()
+    expect(clicked.target.outerHTML).toBe(component.html())
   })
 
-  test('accepts a @type', t => {
+  test('accepts a @type', () => {
     const text = 'Some text.'
 
     let component = shallow(<Button label={text} type="submit" />)
-    t.equal(component.text(), text, 'text() matches @label')
-    t.equal(component.find('button').prop('type'), 'submit')
+    expect(component.text()).toBe(text)
+    expect(component.find('button').prop('type')).toBe('submit')
 
     component = shallow(<Button label={text} type="reset" />)
-    t.equal(component.text(), text, 'text() matches @label')
-    t.equal(component.find('button').prop('type'), 'reset')
+    expect(component.text()).toBe(text)
+    expect(component.find('button').prop('type')).toBe('reset')
 
     component = shallow(<Button label={text} type="button" />)
-    t.equal(component.text(), text, 'text() matches @label')
-    t.equal(component.find('button').prop('type'), 'button')
-
-    t.end()
+    expect(component.text()).toBe(text)
+    expect(component.find('button').prop('type')).toBe('button')
   })
 })

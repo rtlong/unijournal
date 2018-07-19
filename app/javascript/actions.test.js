@@ -1,4 +1,4 @@
-import test from 'tape'
+import expect from 'expect'
 import { mockStore } from '../../test-helper'
 import ACTIONS, {
   addPost,
@@ -11,17 +11,17 @@ import reducer from './reducer'
 
 const initialState = reducer(undefined, { type: '@@redux/INIT-test' })
 
-test('actions', () => {
-  test('createPost', { skip: true }, t => {
-    test('when newPostForm.source empty', async t => {
+describe('actions', () => {
+  describe.skip('createPost', () => {
+    test('when newPostForm.source empty', async () => {
       const store = mockStore(initialState)
 
       await store.dispatch(createPost())
       const actions = store.getActions()
-      t.equal(actions.length, 0, 'does nothing when no source')
+      expect(actions.length).toBe(0)
     })
 
-    test('when newPostForm.source has content', async t => {
+    test('when newPostForm.source has content', async () => {
       const state = { ...initialState }
       state.newPostForm.source = 'foo bar'
       const store = mockStore(state)
@@ -29,24 +29,24 @@ test('actions', () => {
       await store.dispatch(createPost())
       const actions = store.getActions()
 
-      t.equal(actions.length, 1)
+      expect(actions.length).toBe(1)
 
       const { type, payload: { body, timestamp } } = actions[0]
 
-      t.equal(type, ACTIONS.ADD_POST)
-      t.equal(body, 'foo bar')
-      t.ok(timestamp instanceof Date)
+      expect(type).toBe(ACTIONS.ADD_POST)
+      expect(body).toBe('foo bar')
+      expect(timestamp instanceof Date).toBeTruthy()
     })
   })
 
   function testSimpleActionCreator(actionCreator, expectedAction) {
-    test(actionCreator.name, async t => {
+    test(actionCreator.name, async () => {
       const store = mockStore(initialState)
       await store.dispatch(actionCreator())
       const actions = store.getActions()
-      t.equal(actions.length, 1)
+      expect(actions.length).toBe(1)
       const action = actions[0]
-      t.deepEqual(action, expectedAction)
+      expect(action).toEqual(expectedAction)
     })
   }
 

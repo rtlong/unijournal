@@ -1,13 +1,13 @@
+import expect from 'expect'
 import React from 'react'
 import { shallow } from 'enzyme'
 import moment from 'moment'
 import delay from 'delay'
-import test from 'tape'
 
 import Timestamp from './timestamp'
 
-test('components/Timestamp', () => {
-  test('displays the moment.js relative string', t => {
+describe('components/Timestamp', () => {
+  test('displays the moment.js relative string', () => {
     const cases = [
       moment(),
       moment().subtract(1, 'minutes'),
@@ -18,24 +18,21 @@ test('components/Timestamp', () => {
     ]
 
     cases.forEach(timestamp => {
-      test(timestamp.fromNow(), t => {
-        t.plan(3)
+      test(timestamp.fromNow(), () => {
+        expect.assertions(3)
         const component = shallow(
           <Timestamp timestamp={timestamp} />,
           { disableLifecycleMethods: true },
         )
         const el = component.find('abbr.timestamp')
-        t.ok(el,
-              'should have correct element')
-        t.equal(el.render().attr('title'), timestamp.toString(),
-                 '@title should equal exact timestamp')
-        t.equal(component.text(), timestamp.fromNow(),
-                 'text should be moment.js fromNow()')
+        expect(el).toBeTruthy()
+        expect(el.render().attr('title')).toBe(timestamp.toString())
+        expect(component.text()).toBe(timestamp.fromNow())
       })
     })
   })
 
-  test('updates itself', async t => {
+  test('updates itself', async () => {
     const thresh = moment.relativeTimeThreshold('s')
     const timestamp = moment().subtract(thresh - 1, 'seconds')
 
@@ -46,8 +43,7 @@ test('components/Timestamp', () => {
     await delay(1100) // wait over a second. moment output will be different and tick() should have occured to update the component
     component.update() // ask Enzyme to update it's rendered state, which seems neccesary for some reason
 
-    t.notEqual(text0, component.text(),
-               'updates text over time')
+    expect(text0).not.toBe(component.text())
 
     component.unmount() // unmount to clearInterval so test doesn't hang
   })

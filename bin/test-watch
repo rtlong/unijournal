@@ -49,9 +49,9 @@ function runLintAll() {
   return runLinter('.')
 }
 
-function runTape(testFiles) {
+function runTestProcess(testFiles) {
   return new Promise((resolve, reject) => {
-    const cmd = ['node_modules/.bin/tape', '-r', 'babel-register', ...testFiles]
+    const cmd = ['node_modules/.bin/jest', ...testFiles]
     console.log('Running Tape', ...testFiles)
     // run Tape process
     const tape = spawn(process.execPath, cmd, { stdio: ['ignore', 'pipe', process.stderr] })
@@ -74,7 +74,7 @@ function runTape(testFiles) {
 }
 
 function runAllTests() {
-  return runTape(['app/javascript/**/*.test.js?(x)'])
+  return runTestProcess(['app/javascript/**/*.test.js?(x)'])
 }
 
 function promisify(fn) {
@@ -142,7 +142,7 @@ function setupWatchmanSubscriptionHandlers(watchman, scheduleProcess) {
     })
 
     if (!runAll && testFiles.length === 0) return
-    scheduleProcess(() => (runAll ? runAllTests() : runTape(testFiles)))
+    scheduleProcess(() => (runAll ? runAllTests() : runTestProcess(testFiles)))
   })
 
   watchman.on('subscription', ({ subscription, files }) => {

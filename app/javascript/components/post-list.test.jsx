@@ -1,10 +1,10 @@
+import expect from 'expect'
 import React from 'react'
 import { shallow } from 'enzyme'
-import test from 'tape'
 import PostList from './post-list'
 
-test('components/PostList', () => {
-  test('looks correct', t => {
+describe('components/PostList', () => {
+  test('looks correct', () => {
     const posts = [
       {
         id: 0,
@@ -21,14 +21,12 @@ test('components/PostList', () => {
     const component = shallow(<PostList posts={posts} />)
     const postComponents = component.find('Post')
 
-    t.equal(postComponents.length, posts.length)
+    expect(postComponents.length).toBe(posts.length)
 
     posts.forEach((post, i) => {
       const postComponent = postComponents.at(i)
-      t.equal(postComponent.key(), post.id.toString())
-      t.deepEqual(postComponent.props(), post)
+      expect(postComponent.key()).toBe(post.id.toString())
+      expect(postComponent.props()).toEqual(post)
     })
-
-    t.end()
   })
 })

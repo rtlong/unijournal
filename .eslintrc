@@ -65,6 +65,10 @@
       "files": ["**/*.test.{js,jsx}"],
       "rules": {
         "react/destructuring-assignment": "off"
+      },
+      "env": {
+        "node": true,
+        "jest": true
       }
     }
   ],
