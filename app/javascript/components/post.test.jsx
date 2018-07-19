@@ -5,12 +5,12 @@ import Markdown from 'react-markdown'
 import test from 'tape'
 import Post from './post'
 
-test('components/Post', suite => {
+test('components/Post', () => {
   const body = 'some text'
   const timestamp = new Date()
   const component = shallow(<Post body={body} timestamp={timestamp} />)
 
-  suite.test('renders @body using <ReactMarkdown/>', t => {
+  test('renders @body using <ReactMarkdown/>', t => {
     const markdown = component.find(Markdown)
     const mdSrc = markdown.prop('source') || markdown.prop('children')
     t.equal(mdSrc, body,
@@ -18,7 +18,7 @@ test('components/Post', suite => {
     t.end()
   })
 
-  suite.test('renders timestamp using <Timestamp />', t => {
+  test('renders timestamp using <Timestamp />', t => {
     t.equal(component.find('Timestamp').prop('timestamp'), timestamp,
             'gives @timestamp as @timestamp to a <Timestamp>')
     t.end()

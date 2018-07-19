@@ -4,10 +4,10 @@ import ACTIONS from './actions'
 import * as Posts from './entities/posts'
 import * as Messages from './entities/messages'
 
-test('reducer', suite => {
+test('reducer', () => {
   const initialState = reducer(undefined, { type: 'INIT' })
 
-  suite.test('initialState', t => {
+  test('initialState', t => {
     t.deepEqual(initialState, {
       newPostForm: {
         source: '',
@@ -20,7 +20,7 @@ test('reducer', suite => {
     t.end()
   })
 
-  suite.test('NEW_POST_SOURCE_CHANGED', t => {
+  test('NEW_POST_SOURCE_CHANGED', t => {
     const state0 = { ...initialState }
     state0.newPostForm.source = ''
 
@@ -40,7 +40,7 @@ test('reducer', suite => {
     t.end()
   })
 
-  suite.test('NEW_POST_FORM_EXPAND', t => {
+  test('NEW_POST_FORM_EXPAND', t => {
     const state0 = { ...initialState }
     state0.newPostForm.expanded = true
 
@@ -60,7 +60,7 @@ test('reducer', suite => {
     t.end()
   })
 
-  suite.test('ADD_POST', t => {
+  test('ADD_POST', t => {
     const state0 = { ...initialState }
     state0.newPostForm.source = 'some text to make sure we clear'
 

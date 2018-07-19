@@ -3,8 +3,8 @@ import { shallow } from 'enzyme'
 import test from 'tape'
 import PostList from './post-list'
 
-test('components/PostList', suite => {
-  suite.test('looks correct', t => {
+test('components/PostList', () => {
+  test('looks correct', t => {
     const posts = [
       {
         id: 0,

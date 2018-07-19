@@ -5,15 +5,15 @@ import test from 'tape'
 import { jsdomInit } from '../../../test-helper'
 import Button from './button'
 
-test('components/Button', suite => {
-  suite.test('looks correct', t => {
+test('components/Button', () => {
+  test('looks correct', t => {
     const text = 'Some text.'
     const component = shallow(<Button label={text} />)
     t.equal(component.text(), text, 'text() matches @label')
     t.end()
   })
 
-  suite.test('registers the onClick handler', t => {
+  test('registers the onClick handler', t => {
     const text = 'Some text.'
     let clicked = false
     const onClick = e => { clicked = e }
@@ -35,7 +35,7 @@ test('components/Button', suite => {
     t.end()
   })
 
-  suite.test('accepts a @type', t => {
+  test('accepts a @type', t => {
     const text = 'Some text.'
 
     let component = shallow(<Button label={text} type="submit" />)

@@ -16,8 +16,8 @@ function buildComponentProps(opts) {
   }, opts)
 }
 
-test('components/NewPost', suite => {
-  suite.test('[expanded=false]', t => {
+test('components/NewPost', () => {
+  test('[expanded=false]', t => {
     const props = buildComponentProps({ expanded: false })
     const component = shallow(<NewPost {...props} />)
     t.ok(component.is('Button'),
@@ -27,7 +27,7 @@ test('components/NewPost', suite => {
     t.end()
   })
 
-  suite.test('[expanded=true]', t => {
+  test('[expanded=true]', t => {
     const source = 'Foo'
     const props = buildComponentProps({
       expanded: true,

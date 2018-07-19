@@ -11,17 +11,17 @@ import reducer from './reducer'
 
 const initialState = reducer(undefined, { type: '@@redux/INIT-test' })
 
-test('actions', suite => {
-  suite.test('createPost', { skip: true }, t => {
-    t.test('when newPostForm.source empty', async st => {
+test('actions', () => {
+  test('createPost', { skip: true }, t => {
+    test('when newPostForm.source empty', async t => {
       const store = mockStore(initialState)
 
       await store.dispatch(createPost())
       const actions = store.getActions()
-      st.equal(actions.length, 0, 'does nothing when no source')
+      t.equal(actions.length, 0, 'does nothing when no source')
     })
 
-    t.test('when newPostForm.source has content', async st => {
+    test('when newPostForm.source has content', async t => {
       const state = { ...initialState }
       state.newPostForm.source = 'foo bar'
       const store = mockStore(state)
@@ -29,18 +29,18 @@ test('actions', suite => {
       await store.dispatch(createPost())
       const actions = store.getActions()
 
-      st.equal(actions.length, 1)
+      t.equal(actions.length, 1)
 
       const { type, payload: { body, timestamp } } = actions[0]
 
-      st.equal(type, ACTIONS.ADD_POST)
-      st.equal(body, 'foo bar')
-      st.ok(timestamp instanceof Date)
+      t.equal(type, ACTIONS.ADD_POST)
+      t.equal(body, 'foo bar')
+      t.ok(timestamp instanceof Date)
     })
   })
 
   function testSimpleActionCreator(actionCreator, expectedAction) {
-    suite.test(actionCreator.name, async t => {
+    test(actionCreator.name, async t => {
       const store = mockStore(initialState)
       await store.dispatch(actionCreator())
       const actions = store.getActions()
