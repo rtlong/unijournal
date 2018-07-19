@@ -2,7 +2,7 @@
   "name": "unijournal",
   "private": true,
   "scripts": {
-    "test": "tape -r babel-register 'app/javascript/**/*.test.js?(x)' | faucet"
+    "test": "jest"
   },
   "dependencies": {
     "@rails/webpacker": "3.5",
@@ -36,6 +36,7 @@
     "eslint-plugin-react": "^7.9.1",
     "faucet": "^0.0.1",
     "fb-watchman": "^2.0.0",
+    "jest": "^23.4.1",
     "jsdom": "^11.11.0",
     "react-test-renderer": "^16.4.1",
     "redux-mock-store": "^1.5.3",
