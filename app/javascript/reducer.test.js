@@ -2,6 +2,7 @@ import { test } from '../../test-helper'
 import reducer from './reducer'
 import ACTIONS from './actions'
 import * as Posts from './entities/posts'
+import * as Messages from './entities/messages'
 
 test('reducer', suite => {
   const initialState = reducer(undefined, { type: 'INIT' })
@@ -13,6 +14,7 @@ test('reducer', suite => {
         expanded: false,
       },
       posts: Posts.empty,
+      messages: Messages.empty,
     })
 
     t.end()

@@ -2,11 +2,14 @@ import { combineReducers } from 'redux'
 
 import ACTIONS from './actions'
 import * as Posts from './entities/posts'
+import * as Messages from './entities/messages'
 
 function posts(state = Posts.empty, { type, payload }) {
   switch (type) {
-    case ACTIONS.ADD_POST:
+    case ACTIONS.POSTS_ADD:
       return Posts.add(state, payload)
+    case ACTIONS.POSTS_RECEIVE:
+      return Posts.load(payload)
     default:
       return state
   }
@@ -37,7 +40,21 @@ function newPostForm(state = { source: '', expanded: false }, action) {
   }
 }
 
+function messages(state = Messages.empty, { type, payload }) {
+  switch (type) {
+    case ACTIONS.MESSAGES_ADD:
+      return Messages.add(state, payload)
+
+    case ACTIONS.MESSAGES_DEL:
+      return Messages.del(state, payload.id)
+
+    default:
+      return state
+  }
+}
+
 export default combineReducers({
+  messages,
   posts,
   newPostForm,
 })

@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
 import {
-  addPost,
+  createPost,
   newPostFormClose,
   newPostFormOpen,
   newPostSourceChanged,
@@ -16,7 +16,7 @@ function mapStateToProps(state) {
 const mapDispatchToProps = dispatch => bindActionCreators({
   onOpen: newPostFormOpen,
   onCancel: newPostFormClose,
-  onSubmit: addPost,
+  onSubmit: createPost,
   onChange: newPostSourceChanged,
 }, dispatch)
 

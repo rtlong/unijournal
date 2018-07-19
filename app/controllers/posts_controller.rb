@@ -6,4 +6,12 @@ class PostsController < ApplicationController
       format.json { render json: posts }
     end
   end
+
+  def create
+    post = Post.create(body: params.fetch(:body))
+
+    respond_to do |format|
+      format.json { render json: post }
+    end
+  end
 end

@@ -38,9 +38,17 @@ export function update(posts, id, post) {
   }
 }
 
-export function load(collection) {
-  return collection.reduce((posts, serializedPost) => add(posts, {
+// naming this is stumping me... it takes in *an Object* (already deserialized from JSON coming from Rails) and converts to the shape that we use in the state
+export function deserialize(serializedPost) {
+  return {
     ...serializedPost,
     timestamp: new Date(serializedPost.created_at),
-  }), empty)
+  }
+}
+
+export function load(collection) {
+  return collection.reduce(
+    (posts, serializedPost) => add(posts, deserialize(serializedPost)),
+    empty,
+  )
 }
