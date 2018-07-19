@@ -3,12 +3,9 @@
 import path from 'path'
 import { spawn } from 'child_process'
 import Faucet from 'faucet'
-import tapMin from 'tap-min'
 import Watchman from 'fb-watchman'
 
 const testFilePattern = /\.test\.jsx?$/
-
-let testFormatter = tapMin
 
 function buildFaucet() {
   return Faucet({
@@ -16,12 +13,11 @@ function buildFaucet() {
   })
 }
 
+let testFormatter = buildFaucet
+
 function setTestFormatter(formatter) {
   testFormatter = formatter
   switch (formatter) {
-    case tapMin:
-      console.log('Tests formatted using tap-min')
-      break
     case buildFaucet:
       console.log('Tests formatted using faucet')
       break
@@ -239,18 +235,12 @@ process.stdin.on('data', chunk => {
         case false:
           setTestFormatter(buildFaucet)
           break
-        case tapMin:
-          setTestFormatter(false)
-          break
         default:
-          setTestFormatter(tapMin)
+          setTestFormatter(false)
       }
       break
     case 'f raw':
       setTestFormatter(false)
-      break
-    case 'f min':
-      setTestFormatter(tapMin)
       break
     case 'f faucet':
       setTestFormatter(buildFaucet)
