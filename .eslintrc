@@ -1,41 +1,6 @@
 {
-  "extends": "airbnb",
+  "extends": ["airbnb", "prettier", "prettier/react"],
   "rules": {
-    "semi": ["error", "never", {
-      "beforeStatementContinuationChars": "always"
-    }],
-    "max-len": ["warn", 100, 2, {
-      "ignoreUrls": true,
-      "ignoreComments": true,
-      "ignoreRegExpLiterals": true,
-      "ignoreStrings": true,
-      "ignoreTemplateLiterals": true
-    }],
-    "indent": ["off"],
-    "object-curly-newline": ["error",
-      {
-        "ObjectExpression": {
-          "minProperties": 4,
-          "multiline": true,
-          "consistent": true
-        },
-        "ObjectPattern": {
-          "multiline": true,
-          "consistent": true
-        },
-        "ImportDeclaration": {
-          "minProperties": 4,
-          "multiline": true,
-          "consistent": true
-        },
-        "ExportDeclaration": {
-          "minProperties": 4,
-          "multiline": true,
-          "consistent": true
-        }
-      }
-    ],
-    "arrow-parens": ["warn", "as-needed"],
     "import/no-extraneous-dependencies": [
       "error",
       {
@@ -53,7 +18,7 @@
           "**/webpack.config.*.js",
           "**/gulpfile.js",
           "**/gulpfile.*.js",
-          "**/Gruntfile{,.js}",
+          "**/Gruntfile{,.js}"
         ],
         "optionalDependencies": false
       }
@@ -73,7 +38,7 @@
     }
   ],
   "env": {
-    "node": true,
+    "node": true
   },
   "parserOptions": {
     "ecmaVersion": "2018",
