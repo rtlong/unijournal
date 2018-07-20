@@ -1,13 +1,6 @@
-import EnzymeReactAdapter from 'enzyme-adapter-react-16'
-import { configure as configureEnzyme } from 'enzyme'
 import { JSDOM } from 'jsdom'
 import configureStore from 'redux-mock-store'
 import ReduxThunk from 'redux-thunk'
-
-beforeAll(() => {
-  configureEnzyme({ adapter: new EnzymeReactAdapter() })
-})
-
 
 function copyProps(src, target) {
   const props = Object.getOwnPropertyNames(src)
@@ -31,16 +24,6 @@ export function jsdomInit() {
     userAgent: 'node.js',
   }
   copyProps(window, global)
-}
-
-export function mock() {
-  const m = function mockedFunc(...args) {
-    m.called = true
-    m.args = args
-  }
-  m.called = false
-  m.args = null
-  return m
 }
 
 export function mockStore(getState) {

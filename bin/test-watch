@@ -157,7 +157,7 @@ watchmanP.then(({ watchman }) => {
     expression: [
       'allof',
       ['ipcre', '.jsx?$'],
-      ['not', ['ipcre', '^node_modules', 'wholename']],
+      ['not', ['ipcre', '^(node_modules|tmp)', 'wholename']],
       ['not', ['ipcre', '^\\.#']],
     ],
     fields: ['name', 'exists'],
@@ -176,7 +176,7 @@ watchmanP.then(({ watchman }) => {
                  ['anyof',
                   ['ipcre', '(\\.jsx?|\\.eslintrc)$'],
                   ['match', 'test-watch']],
-                 ['not', ['ipcre', '^node_modules', 'wholename']],
+                 ['not', ['ipcre', '^(node_modules|tmp)', 'wholename']],
                  ['not', ['ipcre', '^\\.#']]],
     fields: ['name', 'exists'],
   }
