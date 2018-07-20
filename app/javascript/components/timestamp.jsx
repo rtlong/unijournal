@@ -1,8 +1,8 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import Moment from 'moment'
+import React from "react"
+import PropTypes from "prop-types"
+import Moment from "moment"
 
-Moment.relativeTimeThreshold('ss', 3) // make it count up seconds until 45s
+Moment.relativeTimeThreshold("ss", 3) // make it count up seconds until 45s
 
 function computeTextFromDate(date) {
   const moment = Moment(date)
@@ -11,10 +11,8 @@ function computeTextFromDate(date) {
 
 class Timestamp extends React.Component {
   static propTypes = {
-    timestamp: PropTypes.oneOfType([
-      PropTypes.instanceOf(Date),
-      PropTypes.instanceOf(Moment),
-    ]).isRequired,
+    timestamp: PropTypes.oneOfType([PropTypes.instanceOf(Date), PropTypes.instanceOf(Moment)])
+      .isRequired,
   }
 
   constructor(props) {

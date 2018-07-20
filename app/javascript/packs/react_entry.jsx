@@ -1,14 +1,14 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import { createStore, compose, applyMiddleware } from 'redux'
-import ReduxThunk from 'redux-thunk'
-import { Provider } from 'react-redux'
+import React from "react"
+import ReactDOM from "react-dom"
+import { createStore, compose, applyMiddleware } from "redux"
+import ReduxThunk from "redux-thunk"
+import { Provider } from "react-redux"
 
-import App from '../app'
-import reducer from '../reducer'
-import * as Posts from '../entities/posts'
+import App from "../app"
+import reducer from "../reducer"
+import * as Posts from "../entities/posts"
 
-import * as actions from '../actions'
+import * as actions from "../actions"
 
 global.actions = actions
 
@@ -30,7 +30,7 @@ function setupStore() {
   return createStore(reducer, state, composeEnhancers(applyMiddleware(ReduxThunk)))
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   const store = setupStore()
   global.store = store
 
@@ -40,6 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     <Provider store={store}>
       <App />
     </Provider>,
-    document.body.appendChild(document.createElement('div')),
+    document.body.appendChild(document.createElement("div")),
   )
 })

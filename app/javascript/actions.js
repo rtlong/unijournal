@@ -1,24 +1,25 @@
-import fetch from 'cross-fetch'
+import fetch from "cross-fetch"
 
-import { csrfToken } from './rails'
-import * as Posts from './entities/posts'
+import { csrfToken } from "./rails"
+import * as Posts from "./entities/posts"
 
 const ACTIONS = {
-  ADD_POST: 'POSTS_ADD',
-};
-[
-  'MESSAGES_ADD',
-  'MESSAGES_DEL',
-  'POSTS_ADD',
-  'POSTS_UPDATE',
-  'POSTS_REQUEST',
-  'POSTS_RECEIVE',
-  'NEW_POST_FORM_EXPAND',
-  'NEW_POST_SOURCE_CHANGED',
-].forEach(sym => { ACTIONS[sym] = sym })
+  ADD_POST: "POSTS_ADD",
+}
+;[
+  "MESSAGES_ADD",
+  "MESSAGES_DEL",
+  "POSTS_ADD",
+  "POSTS_UPDATE",
+  "POSTS_REQUEST",
+  "POSTS_RECEIVE",
+  "NEW_POST_FORM_EXPAND",
+  "NEW_POST_SOURCE_CHANGED",
+].forEach(sym => {
+  ACTIONS[sym] = sym
+})
 
 export default ACTIONS
-
 
 export function newPostFormOpen() {
   return {
@@ -44,21 +45,21 @@ export function newPostSourceChanged(payload) {
 function postJSON(url, data) {
   // Default options are marked with *
   return fetch(url, {
-    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-    mode: 'cors', // no-cors, cors, *same-origin
-    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    credentials: 'same-origin', // include, same-origin, *omit
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, cors, *same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, same-origin, *omit
     headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'X-CSRF-Token': csrfToken(),
+      "Content-Type": "application/json; charset=utf-8",
+      "X-CSRF-Token": csrfToken(),
     },
-    redirect: 'follow', // manual, *follow, error
-    referrer: 'no-referrer', // no-referrer, *client
+    redirect: "follow", // manual, *follow, error
+    referrer: "no-referrer", // no-referrer, *client
     body: JSON.stringify(data), // body data type must match 'Content-Type' header
   })
 }
 
-export function showMessage(message, type = 'info', timeout = 10000) {
+export function showMessage(message, type = "info", timeout = 10000) {
   return dispatch => {
     const id = new Date().getTime()
 
@@ -72,18 +73,20 @@ export function showMessage(message, type = 'info', timeout = 10000) {
     })
 
     if (timeout) {
-      setTimeout(() => dispatch({
-        type: ACTIONS.MESSAGES_DEL,
-        payload: {
-          id,
-        },
-      }), timeout)
+      const deleteMessage = () =>
+        dispatch({
+          type: ACTIONS.MESSAGES_DEL,
+          payload: {
+            id,
+          },
+        })
+      setTimeout(deleteMessage, timeout)
     }
   }
 }
 
 export function showError(err, timeout = 10000) {
-  return showMessage(err, 'error', timeout)
+  return showMessage(err, "error", timeout)
 }
 
 export function requestPosts() {
@@ -118,7 +121,7 @@ export function updatePost(id, post) {
 
 export function fetchPosts() {
   return async dispatch => {
-    const response = await fetch('/posts', { method: 'GET' })
+    const response = await fetch("/posts", { method: "GET" })
     const json = await response.json()
     dispatch(receivePosts(json))
   }
@@ -130,11 +133,11 @@ export function createPost() {
     if (!postBody) return
 
     try {
-      const response = await postJSON('/posts', {
+      const response = await postJSON("/posts", {
         body: postBody,
       })
       if (!response.ok) {
-        dispatch(showError('Error during POST /posts'))
+        dispatch(showError("Error during POST /posts"))
         return
       }
       const json = await response.json()

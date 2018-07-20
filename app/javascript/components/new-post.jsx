@@ -1,8 +1,8 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import Markdown from 'react-markdown'
+import React from "react"
+import PropTypes from "prop-types"
+import Markdown from "react-markdown"
 
-import Button from './button'
+import Button from "./button"
 
 const NewPost = ({ expanded, source, onOpen, onCancel, onChange, onSubmit }) => {
   let input
@@ -28,7 +28,7 @@ const NewPost = ({ expanded, source, onOpen, onCancel, onChange, onSubmit }) => 
 }
 
 NewPost.defaultProps = {
-  source: '',
+  source: "",
 }
 
 NewPost.propTypes = {

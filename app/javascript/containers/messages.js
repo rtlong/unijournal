@@ -1,8 +1,7 @@
+import { connect } from "react-redux"
 
-import { connect } from 'react-redux'
-
-import MessagesList from '../components/messages-list'
-import * as Messages from '../entities/messages'
+import MessagesList from "../components/messages-list"
+import * as Messages from "../entities/messages"
 
 function mapStateToProps(state) {
   return {

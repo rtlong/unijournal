@@ -1,8 +1,8 @@
-import { combineReducers } from 'redux'
+import { combineReducers } from "redux"
 
-import ACTIONS from './actions'
-import * as Posts from './entities/posts'
-import * as Messages from './entities/messages'
+import ACTIONS from "./actions"
+import * as Posts from "./entities/posts"
+import * as Messages from "./entities/messages"
 
 function posts(state = Posts.empty, { type, payload }) {
   switch (type) {
@@ -15,12 +15,12 @@ function posts(state = Posts.empty, { type, payload }) {
   }
 }
 
-function newPostForm(state = { source: '', expanded: false }, action) {
+function newPostForm(state = { source: "", expanded: false }, action) {
   switch (action.type) {
     case ACTIONS.ADD_POST:
       return {
         ...state,
-        source: '',
+        source: "",
       }
 
     case ACTIONS.NEW_POST_FORM_EXPAND:

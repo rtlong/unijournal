@@ -1,18 +1,21 @@
 {
-  "presets": [
-    ["env", {
-      "targets": {
-        "uglify": true
+  presets: [
+    [
+      "env",
+      {
+        targets: {
+          uglify: true,
+        },
+        useBuiltIns: true,
       },
-      "useBuiltIns": true
-    }],
+    ],
     "stage-3",
-    "react"
+    "react",
   ],
 
-  "plugins": [
+  plugins: [
     "syntax-dynamic-import",
     "transform-runtime",
-    ["transform-class-properties", { "spec": true }]
-  ]
+    ["transform-class-properties", { spec: true }],
+  ],
 }

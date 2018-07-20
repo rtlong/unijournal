@@ -1,16 +1,16 @@
-import expect from 'expect'
-import reducer from './reducer'
-import ACTIONS from './actions'
-import * as Posts from './entities/posts'
-import * as Messages from './entities/messages'
+import expect from "expect"
+import reducer from "./reducer"
+import ACTIONS from "./actions"
+import * as Posts from "./entities/posts"
+import * as Messages from "./entities/messages"
 
-describe('reducer', () => {
-  const initialState = reducer(undefined, { type: 'INIT' })
+describe("reducer", () => {
+  const initialState = reducer(undefined, { type: "INIT" })
 
-  test('initialState', () => {
+  test("initialState", () => {
     expect(initialState).toEqual({
       newPostForm: {
-        source: '',
+        source: "",
         expanded: false,
       },
       posts: Posts.empty,
@@ -18,25 +18,25 @@ describe('reducer', () => {
     })
   })
 
-  test('NEW_POST_SOURCE_CHANGED', () => {
+  test("NEW_POST_SOURCE_CHANGED", () => {
     const state0 = { ...initialState }
-    state0.newPostForm.source = ''
+    state0.newPostForm.source = ""
 
     const action = {
       type: ACTIONS.NEW_POST_SOURCE_CHANGED,
-      payload: 'foo',
+      payload: "foo",
     }
 
     expect(reducer(state0, action)).toEqual({
       ...state0,
       newPostForm: {
         ...state0.newPostForm,
-        source: 'foo',
+        source: "foo",
       },
     })
   })
 
-  test('NEW_POST_FORM_EXPAND', () => {
+  test("NEW_POST_FORM_EXPAND", () => {
     const state0 = { ...initialState }
     state0.newPostForm.expanded = true
 
@@ -54,19 +54,19 @@ describe('reducer', () => {
     })
   })
 
-  test('ADD_POST', () => {
+  test("ADD_POST", () => {
     const state0 = { ...initialState }
-    state0.newPostForm.source = 'some text to make sure we clear'
+    state0.newPostForm.source = "some text to make sure we clear"
 
     const action1 = {
       type: ACTIONS.ADD_POST,
       payload: {
-        body: 'bar foo',
+        body: "bar foo",
         timestamp: new Date(),
       },
     }
     const state1 = reducer(state0, action1)
-    expect(state1.newPostForm.source).toBe('')
+    expect(state1.newPostForm.source).toBe("")
     expect(Posts.all(state1.posts)).toEqual([
       {
         ...action1.payload,
@@ -77,12 +77,12 @@ describe('reducer', () => {
     const action2 = {
       type: ACTIONS.ADD_POST,
       payload: {
-        body: 'foo bar',
+        body: "foo bar",
         timestamp: new Date(),
       },
     }
     const state2 = reducer(state1, action2)
-    expect(state2.newPostForm.source).toBe('')
+    expect(state2.newPostForm.source).toBe("")
     expect(Posts.all(state2.posts)).toEqual([
       {
         ...action1.payload,
