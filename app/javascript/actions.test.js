@@ -1,14 +1,31 @@
 import expect from "expect"
 import { mockStore } from "../../test-helper"
-import { POSTS_ADD, NEW_POST_FORM_EXPAND, NEW_POST_FORM_SOURCE_CHANGED } from "./action_types"
+import {
+  MESSAGES_ADD,
+  NEW_POST_FORM_EXPAND,
+  NEW_POST_FORM_SOURCE_CHANGED,
+  POSTS_ADD,
+  POSTS_UPDATE,
+  POSTS_REQUEST,
+  POSTS_RECEIVE,
+} from "./action_types"
 import {
   addPost,
-  newPostFormOpen,
-  newPostFormClose,
-  newPostSourceChanged,
   createPost,
+  fetchPosts,
+  newPostFormClose,
+  newPostFormOpen,
+  newPostSourceChanged,
+  requestPosts,
+  receivePosts,
+  showMessage,
+  showError,
+  updatePost,
 } from "./actions"
 import reducer from "./reducer"
+import postJSON from "./util/post_json"
+
+jest.mock("./util/post_json")
 
 const initialState = reducer(undefined, { type: "@@redux/INIT-test" })
 
@@ -21,15 +38,12 @@ function testSimpleActionCreator(actionCreator, actionCreatorArgs, expectedActio
   test(actionCreator.name, async () => {
     const store = mockStore(initialState)
     await store.dispatch(actionCreator(...args))
-    const actions = store.getActions()
-    expect(actions.length).toBe(1)
-    const action = actions[0]
-    expect(action).toEqual(expected)
+    expect(store.getActions()).toEqual(Array.of(expected))
   })
 }
 
 describe("actions", () => {
-  describe.skip("createPost", () => {
+  describe("createPost", () => {
     test("when newPostForm.source empty", async () => {
       const store = mockStore(initialState)
 
@@ -43,13 +57,20 @@ describe("actions", () => {
       state.newPostForm.source = "foo bar"
       const store = mockStore(state)
 
+      postJSON.mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({ id: 32, body: "foo bar", created_at: "2018-09-03T03:45:23Z" }),
+      })
       await store.dispatch(createPost())
-      expect(store.getActions()).toBe([
+      expect(postJSON).toHaveBeenCalledWith("/posts", { body: "foo bar" })
+      expect(store.getActions()).toEqual([
         {
           type: POSTS_ADD,
           payload: {
+            id: 32,
             body: "foo bar",
-            timestamp: expect.any(Date),
+            timestamp: new Date("2018-09-03T03:45:23Z"),
           },
         },
       ])
@@ -75,4 +96,43 @@ describe("actions", () => {
     type: NEW_POST_FORM_SOURCE_CHANGED,
     payload: "foo bar",
   })
+
+  testSimpleActionCreator(updatePost, [123, { body: "foo" }], {
+    type: POSTS_UPDATE,
+    payload: {
+      id: 123,
+      post: {
+        body: "foo",
+      },
+    },
+  })
+
+  testSimpleActionCreator(requestPosts, {
+    type: POSTS_REQUEST,
+  })
+
+  testSimpleActionCreator(receivePosts, ["value"], {
+    type: POSTS_RECEIVE,
+    payload: "value",
+  })
+
+  testSimpleActionCreator(showMessage, ["some message", "info", 0], {
+    type: MESSAGES_ADD,
+    payload: {
+      id: expect.any(Number),
+      type: "info",
+      message: "some message",
+    },
+  })
+
+  testSimpleActionCreator(showError, ["some message", 0], {
+    type: MESSAGES_ADD,
+    payload: {
+      id: expect.any(Number),
+      type: "error",
+      message: "some message",
+    },
+  })
+
+  test.skip(fetchPosts.name, () => {})
 })

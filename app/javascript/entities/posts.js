@@ -40,10 +40,10 @@ export function update(posts, id, post) {
 
 // naming this is stumping me... it takes in *an Object* (already deserialized from JSON coming from Rails) and converts to the shape that we use in the state
 export function deserialize(serializedPost) {
-  return {
-    ...serializedPost,
-    timestamp: new Date(serializedPost.created_at),
-  }
+  const p = Object.assign({}, serializedPost)
+  p.timestamp = new Date(serializedPost.created_at)
+  delete p.created_at
+  return p
 }
 
 export function load(collection) {
