@@ -2,42 +2,34 @@ import fetch from "cross-fetch"
 
 import { csrfToken } from "./rails"
 import * as Posts from "./entities/posts"
-
-const ACTIONS = {
-  ADD_POST: "POSTS_ADD",
-}
-;[
-  "MESSAGES_ADD",
-  "MESSAGES_DEL",
-  "POSTS_ADD",
-  "POSTS_UPDATE",
-  "POSTS_REQUEST",
-  "POSTS_RECEIVE",
-  "NEW_POST_FORM_EXPAND",
-  "NEW_POST_SOURCE_CHANGED",
-].forEach(sym => {
-  ACTIONS[sym] = sym
-})
-
-export default ACTIONS
+import {
+  NEW_POST_FORM_EXPAND,
+  NEW_POST_FORM_SOURCE_CHANGED,
+  MESSAGES_ADD,
+  MESSAGES_DEL,
+  POSTS_ADD,
+  POSTS_REQUEST,
+  POSTS_RECEIVE,
+  POSTS_UPDATE,
+} from "./action_types"
 
 export function newPostFormOpen() {
   return {
-    type: ACTIONS.NEW_POST_FORM_EXPAND,
+    type: NEW_POST_FORM_EXPAND,
     payload: true,
   }
 }
 
 export function newPostFormClose() {
   return {
-    type: ACTIONS.NEW_POST_FORM_EXPAND,
+    type: NEW_POST_FORM_EXPAND,
     payload: false,
   }
 }
 
 export function newPostSourceChanged(payload) {
   return {
-    type: ACTIONS.NEW_POST_SOURCE_CHANGED,
+    type: NEW_POST_FORM_SOURCE_CHANGED,
     payload,
   }
 }
@@ -64,7 +56,7 @@ export function showMessage(message, type = "info", timeout = 10000) {
     const id = new Date().getTime()
 
     dispatch({
-      type: ACTIONS.MESSAGES_ADD,
+      type: MESSAGES_ADD,
       payload: {
         id,
         type,
@@ -75,7 +67,7 @@ export function showMessage(message, type = "info", timeout = 10000) {
     if (timeout) {
       const deleteMessage = () =>
         dispatch({
-          type: ACTIONS.MESSAGES_DEL,
+          type: MESSAGES_DEL,
           payload: {
             id,
           },
@@ -91,27 +83,27 @@ export function showError(err, timeout = 10000) {
 
 export function requestPosts() {
   return {
-    type: ACTIONS.POSTS_REQUEST,
+    type: POSTS_REQUEST,
   }
 }
 
 export function receivePosts(json) {
   return {
-    type: ACTIONS.POSTS_RECEIVE,
+    type: POSTS_RECEIVE,
     payload: json,
   }
 }
 
 export function addPost(post) {
   return {
-    type: ACTIONS.POSTS_ADD,
+    type: POSTS_ADD,
     payload: post,
   }
 }
 
 export function updatePost(id, post) {
   return {
-    type: ACTIONS.POSTS_UPDATE,
+    type: POSTS_UPDATE,
     payload: {
       id,
       post,

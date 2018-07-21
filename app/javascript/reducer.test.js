@@ -1,6 +1,15 @@
 import expect from "expect"
 import reducer from "./reducer"
-import ACTIONS from "./actions"
+import {
+  NEW_POST_FORM_EXPAND,
+  NEW_POST_FORM_SOURCE_CHANGED,
+  POSTS_ADD,
+  POSTS_RECEIVE,
+  POSTS_REQUEST,
+  POSTS_UPDATE,
+  MESSAGES_ADD,
+  MESSAGES_DEL,
+} from "./action_types"
 import * as Posts from "./entities/posts"
 import * as Messages from "./entities/messages"
 
@@ -23,7 +32,7 @@ describe("reducer", () => {
     state0.newPostForm.source = ""
 
     const action = {
-      type: ACTIONS.NEW_POST_SOURCE_CHANGED,
+      type: NEW_POST_FORM_SOURCE_CHANGED,
       payload: "foo",
     }
 
@@ -41,7 +50,7 @@ describe("reducer", () => {
     state0.newPostForm.expanded = true
 
     const action = {
-      type: ACTIONS.NEW_POST_FORM_EXPAND,
+      type: NEW_POST_FORM_EXPAND,
       payload: false,
     }
 
@@ -54,12 +63,12 @@ describe("reducer", () => {
     })
   })
 
-  test("ADD_POST", () => {
+  test("POSTS_ADD", () => {
     const state0 = { ...initialState }
     state0.newPostForm.source = "some text to make sure we clear"
 
     const action1 = {
-      type: ACTIONS.ADD_POST,
+      type: POSTS_ADD,
       payload: {
         body: "bar foo",
         timestamp: new Date(),
@@ -75,7 +84,7 @@ describe("reducer", () => {
     ])
 
     const action2 = {
-      type: ACTIONS.ADD_POST,
+      type: POSTS_ADD,
       payload: {
         body: "foo bar",
         timestamp: new Date(),
@@ -94,4 +103,10 @@ describe("reducer", () => {
       },
     ])
   })
+
+  test.skip(POSTS_RECEIVE, () => {})
+  test.skip(POSTS_REQUEST, () => {})
+  test.skip(POSTS_UPDATE, () => {})
+  test.skip(MESSAGES_ADD, () => {})
+  test.skip(MESSAGES_DEL, () => {})
 })

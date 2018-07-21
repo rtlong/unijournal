@@ -1,6 +1,7 @@
 import expect from "expect"
 import { mockStore } from "../../test-helper"
-import ACTIONS, {
+import { POSTS_ADD, NEW_POST_FORM_EXPAND, NEW_POST_FORM_SOURCE_CHANGED } from "./action_types"
+import {
   addPost,
   newPostFormOpen,
   newPostFormClose,
@@ -11,14 +12,19 @@ import reducer from "./reducer"
 
 const initialState = reducer(undefined, { type: "@@redux/INIT-test" })
 
-function testSimpleActionCreator(actionCreator, expectedAction) {
+function testSimpleActionCreator(actionCreator, actionCreatorArgs, expectedAction) {
+  let args = actionCreatorArgs
+  const expected = expectedAction || actionCreatorArgs
+  if (!expectedAction) {
+    args = []
+  }
   test(actionCreator.name, async () => {
     const store = mockStore(initialState)
-    await store.dispatch(actionCreator())
+    await store.dispatch(actionCreator(...args))
     const actions = store.getActions()
     expect(actions.length).toBe(1)
     const action = actions[0]
-    expect(action).toEqual(expectedAction)
+    expect(action).toEqual(expected)
   })
 }
 
@@ -38,38 +44,35 @@ describe("actions", () => {
       const store = mockStore(state)
 
       await store.dispatch(createPost())
-      const actions = store.getActions()
-
-      expect(actions.length).toBe(1)
-
-      const {
-        type,
-        payload: { body, timestamp },
-      } = actions[0]
-
-      expect(type).toBe(ACTIONS.ADD_POST)
-      expect(body).toBe("foo bar")
-      expect(timestamp instanceof Date).toBeTruthy()
+      expect(store.getActions()).toBe([
+        {
+          type: POSTS_ADD,
+          payload: {
+            body: "foo bar",
+            timestamp: expect.any(Date),
+          },
+        },
+      ])
     })
   })
 
-  testSimpleActionCreator(() => addPost({ body: "foo" }), {
-    type: ACTIONS.POSTS_ADD,
+  testSimpleActionCreator(addPost, [{ body: "foo" }], {
+    type: POSTS_ADD,
     payload: { body: "foo" },
   })
 
   testSimpleActionCreator(newPostFormClose, {
-    type: ACTIONS.NEW_POST_FORM_EXPAND,
+    type: NEW_POST_FORM_EXPAND,
     payload: false,
   })
 
   testSimpleActionCreator(newPostFormOpen, {
-    type: ACTIONS.NEW_POST_FORM_EXPAND,
+    type: NEW_POST_FORM_EXPAND,
     payload: true,
   })
 
-  testSimpleActionCreator(() => newPostSourceChanged("foo bar"), {
-    type: ACTIONS.NEW_POST_SOURCE_CHANGED,
+  testSimpleActionCreator(newPostSourceChanged, ["foo bar"], {
+    type: NEW_POST_FORM_SOURCE_CHANGED,
     payload: "foo bar",
   })
 })
