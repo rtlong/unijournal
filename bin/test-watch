@@ -2,48 +2,66 @@
 
 import path from "path"
 import { spawn } from "child_process"
+
+import chalk from "chalk"
 import Watchman from "fb-watchman"
 
 const testFilePattern = /\.test\.jsx?$/
 
-function runLinter(files) {
+function spawnProcessP({ name, args, execName = process.execPath }) {
   return new Promise((resolve, reject) => {
-    const cmd = ["node_modules/.bin/eslint", "--ext", "js,jsx", ...files]
-    console.log("Running ESLint", ...files)
-    spawn(process.execPath, cmd, { stdio: "inherit" })
+    console.log(
+      chalk.blue(
+        `>>> ${name}: ${execName === process.execPath ? "node" : execName} ${args.join(" ")}`,
+      ),
+    )
+    spawn(execName, args, { stdio: "inherit" })
       .on("error", err => {
-        console.error(`error spawning ${cmd[0]}`, err)
+        console.error(`error spawning ${name}`, err)
         reject(err)
       })
       .on("exit", code => {
-        console.error(`ESLint exited ${code}`)
+        if (code === 0) {
+          console.error(chalk.green(`<<< ${name} succeeded`))
+        } else {
+          console.error(chalk.red(`<<< ${name} exited ${code}`))
+        }
         return resolve()
       })
+  })
+}
+
+function runPrettier(files) {
+  return spawnProcessP({
+    args: ["node_modules/.bin/prettier", "--loglevel", "warn", "--write", ...files],
+    name: "Prettier",
+  })
+}
+
+function runPrettierAll() {
+  return runPrettier([".babelrc", ".eslintrc", "bin/test-watch", "**/*.{js,jsx,json,yaml,md}"])
+}
+
+function runLint(files) {
+  return spawnProcessP({
+    args: ["node_modules/.bin/eslint", "--ext", "js,jsx", ...files],
+    name: "ESLint",
   })
 }
 
 function runLintAll() {
-  return runLinter(".")
+  return runLint(".")
 }
 
-function runTestProcess(testFiles) {
-  return new Promise((resolve, reject) => {
-    const cmd = ["node_modules/.bin/jest", ...testFiles]
-    console.log("Running tests", ...testFiles)
-    spawn(process.execPath, cmd, { stdio: ["ignore", process.stdout, process.stderr] })
-      .on("error", err => {
-        console.error(`error spawning ${cmd[0]}`, err)
-        reject(err)
-      })
-      .on("exit", code => {
-        console.error(`Tests exited ${code}`)
-        return resolve()
-      })
+function runJest(files) {
+  return spawnProcessP({
+    args: ["node_modules/.bin/jest", ...files],
+    name: "Jest",
   })
 }
 
-function runAllTests() {
-  return runTestProcess([])
+function runJestAll() {
+  return runJest([])
 }
 
 function promisify(fn) {
@@ -60,148 +78,229 @@ function promisify(fn) {
   })
 }
 
-function initWatchman() {
-  const watchman = new Watchman.Client()
-  return promisify(cb => watchman.capabilityCheck({ optional: [], required: ["term-ipcre"] }, cb))
-    .then(() => watchman)
-    .catch(err => {
-      console.error(err)
-      process.exit(1)
-    })
-}
+class WatchmanManager {
+  constructor(roots) {
+    this.client = new Watchman.Client()
+    this.roots = roots
+  }
 
-function watchProject({ watchman, root }) {
-  return promisify(cb => watchman.command(["watch-project", root], cb))
-    .then(resp => {
-      if ("warning" in resp) {
-        console.log("warning: ", resp.warning)
-      }
-      console.log("watch established on", resp.watch)
-      return { watchman, resp }
+  async start() {
+    await this.init()
+    this.roots.forEach(async rootConfig => {
+      const { root, subscriptions } = rootConfig
+      await this.watchProject({ root })
+      subscriptions.forEach(async ({ name, config, handlers = [] }) => {
+        handlers.forEach(handler => {
+          this.client.on("subscription", event => {
+            const { subscription } = event
+            if (subscription !== name) return
+            /* console.log(event) */
+            handler(event)
+          })
+        })
+        await this.subscribe({ root, sub: config, name })
+      })
     })
-    .catch(error => {
-      console.error("Error creating watch:", error)
-      process.exit(1)
-    })
-}
+  }
 
-function subscribe({ watchman, root, name, sub }) {
-  return promisify(cb => watchman.command(["subscribe", root, name, sub], cb))
-    .then(resp => {
-      if ("warning" in resp) {
-        console.log("warning: ", resp.warning)
-      }
-      return { resp, watchman }
-    })
-    .catch(error => {
-      console.error("Error creating subscription:", error)
-      process.exit(1)
-    })
-}
+  init() {
+    return promisify(cb =>
+      this.client.capabilityCheck({ optional: [], required: ["term-ipcre"] }, cb),
+    )
+  }
 
-function setupWatchmanSubscriptionHandlers(watchman, scheduleProcess) {
-  watchman.on("subscription", ({ subscription, files }) => {
-    if (subscription !== "test") return
-    const testFiles = []
-    const runAll = files.some(file => {
-      const isTestFile = testFilePattern.test(file.name)
-      if (!isTestFile) return true // if event includes any non-tests, short-circuit .some() to exit iteration and runAll = true
-      if (file.exists) testFiles.push(file.name) // still existing test file, add to list
-      return false
-    })
+  async watchProject({ root }) {
+    const resp = await promisify(cb => this.client.command(["watch-project", root], cb))
 
-    if (!runAll && testFiles.length === 0) return
-    scheduleProcess(() => (runAll ? runAllTests() : runTestProcess(testFiles)))
-  })
+    if ("warning" in resp) {
+      console.log("Watchman[WARNING]:", resp.warning)
+    }
 
-  watchman.on("subscription", ({ subscription, files }) => {
-    if (subscription !== "lint") return
-    const filesToLint = files
-      .filter(f => f.exists)
-      .map(f => (path.basename(f.name) === ".eslintrc" ? path.dirname(f.name) : f.name))
-    if (filesToLint.length === 0) return
-    scheduleProcess(() => runLinter(filesToLint))
-  })
+    /* console.log("watch established on", resp.watch) */
+
+    return { resp }
+  }
+
+  async subscribe({ root, name, sub }) {
+    const resp = await promisify(cb => this.client.command(["subscribe", root, name, sub], cb))
+
+    if ("warning" in resp) {
+      console.log("Watchman[WARNING]:", resp.warning)
+    }
+
+    return { resp }
+  }
+
+  stop() {
+    this.client.removeAllListeners("subscription")
+    this.client.end()
+  }
 }
 
 class ProcessManager {
   constructor() {
     this.promiseChain = Promise.resolve()
+    this.shouldExit = false
   }
 
   schedule(processFn) {
-    this.promiseChain = this.promiseChain.then(() => processFn()).catch(err => {
-      console.error(`Error from ${processFn}:`, err)
-    })
+    if (this.shouldExit) return
+
+    this.promiseChain = this.promiseChain
+      .then(() => {
+        if (this.shouldExit) return false
+        return processFn()
+      })
+      .catch(err => {
+        console.error(`Error from ${processFn}:`, err)
+      })
+  }
+
+  exit() {
+    this.shouldExit = true
+    return this.promiseChain
   }
 }
 
 const root = path.dirname(__dirname)
 const procManager = new ProcessManager()
 
-const watchmanP = initWatchman()
-  .then(watchman => watchProject({ watchman, root }))
-  .then(args => {
-    const { watchman } = args
-    const scheduleProcess = proc => {
-      procManager.schedule(proc)
-    }
-    setupWatchmanSubscriptionHandlers(watchman, scheduleProcess)
-    return args
-  })
+const standardExclusions = [
+  ["not", ["ipcre", "^(node_modules|tmp|log|public)", "wholename"]],
+  ["not", ["ipcre", "^\\.#"]],
+]
 
-watchmanP.then(({ watchman }) => {
-  const sub = {
+const prettierConfig = {
+  name: "prettier",
+  config: {
     expression: [
       "allof",
-      ["ipcre", ".jsx?$"],
-      ["not", ["ipcre", "^(node_modules|tmp)", "wholename"]],
-      ["not", ["ipcre", "^\\.#"]],
+      [
+        "anyof",
+        ["ipcre", "\\.(jsx?|json|ya?ml)$"],
+        ["match", ".eslintrc"],
+        ["match", ".babelrc"],
+        ["match", "test-watch"],
+      ],
+      ...standardExclusions,
     ],
     fields: ["name", "exists"],
-  }
-  return subscribe({
-    watchman,
-    sub,
-    root,
-    name: "test",
-  })
-})
+  },
+  handlers: [
+    ({ files }) => {
+      const runList = []
+      const runAll = files.some(file => {
+        if (path.basename(file.name) === ".prettierrc.js") return true
+        if (file.exists) runList.push(file.name)
+        return false
+      })
+      if (runList.length === 0) return
+      if (runAll) {
+        procManager.schedule(runPrettierAll)
+      } else {
+        procManager.schedule(() => runPrettier(runList))
+      }
+    },
+  ],
+}
 
-watchmanP.then(({ watchman }) => {
-  const sub = {
+const lintConfig = {
+  name: "lint",
+  config: {
     expression: [
       "allof",
       ["anyof", ["ipcre", "(\\.jsx?|\\.eslintrc)$"], ["match", "test-watch"]],
-      ["not", ["ipcre", "^(node_modules|tmp)", "wholename"]],
-      ["not", ["ipcre", "^\\.#"]],
+      ...standardExclusions,
     ],
     fields: ["name", "exists"],
-  }
-  return subscribe({
-    watchman,
-    sub,
+  },
+  handlers: [
+    ({ files, is_fresh_instance: isFresh }) => {
+      if (isFresh) {
+        procManager.schedule(runLintAll)
+        return
+      }
+      const filesToLint = files
+        .filter(f => f.exists)
+        .map(f => (path.basename(f.name) === ".eslintrc" ? path.dirname(f.name) : f.name))
+      if (filesToLint.length === 0) return
+      procManager.schedule(() => runLint(filesToLint))
+    },
+  ],
+}
+
+const testConfig = {
+  name: "test",
+  config: {
+    expression: [
+      "allof",
+      ["anyof", ["ipcre", "^app/javascript/", "wholename"], ["ipcre", "^test-.+", "wholename"]],
+      ["ipcre", ".jsx?$"],
+      ...standardExclusions,
+    ],
+    fields: ["name", "exists"],
+  },
+  handlers: [
+    ({ files }) => {
+      const testFiles = []
+      const runAll = files.some(file => {
+        const isTestFile = testFilePattern.test(file.name)
+        if (!isTestFile) return true // if event includes any non-tests, short-circuit .some() to exit iteration and runAll = true
+        if (file.exists) testFiles.push(file.name) // still existing test file, add to list
+        return false
+      })
+
+      if (!runAll && testFiles.length === 0) return
+      if (runAll) {
+        procManager.schedule(runJestAll)
+      } else {
+        procManager.schedule(() => runJest(testFiles))
+      }
+    },
+  ],
+}
+
+const watchmanManager = new WatchmanManager([
+  {
     root,
-    name: "lint",
-  })
-})
+    subscriptions: [prettierConfig, lintConfig, testConfig],
+  },
+])
+watchmanManager.start()
+
+function exit() {
+  console.log("exiting...")
+  watchmanManager.stop()
+  procManager.exit()
+  process.stdin.pause()
+  /* process.stdin.removeAllListeners("data") */
+  /* process.exit() */
+}
 
 process.stdin.resume()
 process.stdin.setEncoding("utf8")
 process.stdin.on("data", chunk => {
   switch (chunk.trim()) {
     case "":
+      procManager.schedule(runPrettierAll)
+      procManager.schedule(runLintAll)
+      procManager.schedule(runJestAll)
+      break
     case "t":
-      procManager.schedule(() => runAllTests())
+      procManager.schedule(runJestAll)
+      break
+    case "p":
+      procManager.schedule(runPrettierAll)
       break
     case "l":
-      procManager.schedule(() => runLintAll())
+      procManager.schedule(runLintAll)
       break
     case "q":
-      console.log("exiting...")
-      process.exit(0)
+      exit()
       break
     default:
       console.log({ chunk })
   }
 })
+
+process.on("SIGINT", exit)
