@@ -2,7 +2,6 @@ import expect from "expect"
 import React from "react"
 
 import { shallow, mount } from "enzyme"
-import { jsdomInit } from "../../../test-helper"
 import Button from "./button"
 
 describe("components/Button", () => {
@@ -19,7 +18,6 @@ describe("components/Button", () => {
       clicked = e
     }
 
-    jsdomInit()
     const component = mount(<Button label={text} onClick={onClick} />)
 
     expect(clicked).toBeFalsy()

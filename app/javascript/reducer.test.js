@@ -27,7 +27,7 @@ describe("reducer", () => {
     })
   })
 
-  test("NEW_POST_SOURCE_CHANGED", () => {
+  test(NEW_POST_FORM_SOURCE_CHANGED, () => {
     const state0 = { ...initialState }
     state0.newPostForm.source = ""
 
@@ -45,7 +45,7 @@ describe("reducer", () => {
     })
   })
 
-  test("NEW_POST_FORM_EXPAND", () => {
+  test(NEW_POST_FORM_EXPAND, () => {
     const state0 = { ...initialState }
     state0.newPostForm.expanded = true
 
@@ -63,7 +63,7 @@ describe("reducer", () => {
     })
   })
 
-  test("POSTS_ADD", () => {
+  test(POSTS_ADD, () => {
     const state0 = { ...initialState }
     state0.newPostForm.source = "some text to make sure we clear"
 
@@ -104,7 +104,39 @@ describe("reducer", () => {
     ])
   })
 
-  test.skip(POSTS_RECEIVE, () => {})
+  test(POSTS_RECEIVE, () => {
+    const state0 = {
+      ...initialState,
+      posts: Posts.add(Posts.empty, { body: "bar", timestamp: new Date() }), // should replace this
+    }
+
+    expect(Posts.all(state0.posts)).toEqual([
+      {
+        id: 0,
+        body: "bar",
+        timestamp: expect.any(Date),
+      },
+    ])
+    const action1 = {
+      type: POSTS_RECEIVE,
+      payload: [
+        {
+          id: 123,
+          body: "foo",
+          created_at: "2018-03-04T03:42:32Z",
+        },
+      ],
+    }
+    const state1 = reducer(state0, action1)
+    expect(Posts.all(state1.posts)).toEqual([
+      {
+        id: 123,
+        body: "foo",
+        timestamp: new Date(action1.payload[0].created_at),
+      },
+    ])
+  })
+
   test.skip(POSTS_REQUEST, () => {})
   test.skip(POSTS_UPDATE, () => {})
   test.skip(MESSAGES_ADD, () => {})

@@ -34,34 +34,24 @@ export function newPostSourceChanged(payload) {
   }
 }
 
-export function showMessage(message, type = "info", timeout = 10000) {
-  return dispatch => {
-    const id = new Date().getTime()
-
-    dispatch({
-      type: MESSAGES_ADD,
-      payload: {
-        id,
-        type,
-        message,
-      },
-    })
-
-    if (timeout) {
-      const deleteMessage = () =>
-        dispatch({
-          type: MESSAGES_DEL,
-          payload: {
-            id,
-          },
-        })
-      setTimeout(deleteMessage, timeout)
-    }
+export function deleteMessage(id) {
+  return {
+    type: MESSAGES_DEL,
+    payload: {
+      id,
+    },
   }
 }
 
-export function showError(err, timeout = 10000) {
-  return showMessage(err, "error", timeout)
+export function addMessage(id, type, message) {
+  return {
+    type: MESSAGES_ADD,
+    payload: {
+      id,
+      type,
+      message,
+    },
+  }
 }
 
 export function requestPosts() {
@@ -94,9 +84,29 @@ export function updatePost(id, post) {
   }
 }
 
+export function showMessage(message, type = "info", timeout = 10000) {
+  return dispatch => {
+    const id = new Date().getTime()
+
+    dispatch(addMessage(id, type, message))
+
+    if (timeout) {
+      setTimeout(() => dispatch(deleteMessage(id)), timeout)
+    }
+  }
+}
+
+export function showError(err, timeout = 10000) {
+  return showMessage(err, "error", timeout)
+}
+
 export function fetchPosts() {
   return async dispatch => {
     const response = await fetch("/posts", { method: "GET" })
+    if (!response.ok) {
+      dispatch(showError("Error during GET /posts"))
+      return
+    }
     const json = await response.json()
     dispatch(receivePosts(json))
   }

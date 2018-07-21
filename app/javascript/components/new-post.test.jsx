@@ -2,7 +2,6 @@ import expect from "expect"
 import React from "react"
 import { shallow, mount } from "enzyme"
 
-import { jsdomInit } from "../../../test-helper"
 import NewPost from "./new-post"
 
 function buildComponentProps(opts) {
@@ -37,7 +36,6 @@ describe("components/NewPost", () => {
       source,
     })
 
-    jsdomInit()
     const component = mount(<NewPost {...props} />)
 
     test("has a <Button> to close the form", () => {
