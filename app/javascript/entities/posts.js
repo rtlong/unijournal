@@ -9,6 +9,7 @@ export function all(posts) {
 }
 
 export function get(posts, id) {
+  if (posts.ids.indexOf(id) === -1) throw new Error(`Post ${id} not found`)
   return posts.by_id[id]
 }
 
@@ -33,6 +34,7 @@ export function update(posts, id, post) {
   return {
     ...posts,
     by_id: {
+      ...posts.by_id,
       [id]: post,
     },
   }
