@@ -10,6 +10,7 @@ const testFilePattern = /\.test\.jsx?$/
 
 function spawnProcessP({ name, args, execName = process.execPath }) {
   return new Promise((resolve, reject) => {
+    /* console.log({ name, execName, args }) */
     console.log(
       chalk.blue(
         `>>> ${name}: ${execName === process.execPath ? "node" : execName} ${args.join(" ")}`,
@@ -29,39 +30,6 @@ function spawnProcessP({ name, args, execName = process.execPath }) {
         return resolve()
       })
   })
-}
-
-function runPrettier(files) {
-  return spawnProcessP({
-    args: ["node_modules/.bin/prettier", "--loglevel", "warn", "--write", ...files],
-    name: "Prettier",
-  })
-}
-
-function runPrettierAll() {
-  return runPrettier([".babelrc", ".eslintrc", "bin/test-watch", "**/*.{js,jsx,json,yaml,md}"])
-}
-
-function runLint(files) {
-  return spawnProcessP({
-    args: ["node_modules/.bin/eslint", "--ext", "js,jsx", ...files],
-    name: "ESLint",
-  })
-}
-
-function runLintAll() {
-  return runLint(".")
-}
-
-function runJest(files) {
-  return spawnProcessP({
-    args: ["node_modules/.bin/jest", ...files],
-    name: "Jest",
-  })
-}
-
-function runJestAll() {
-  return runJest([])
 }
 
 function promisify(fn) {
@@ -94,7 +62,7 @@ class WatchmanManager {
           this.client.on("subscription", event => {
             const { subscription } = event
             if (subscription !== name) return
-            /* console.log(event) */
+            /* console.log({ subscription, files: event.files }) */
             handler(event)
           })
         })
@@ -137,23 +105,96 @@ class WatchmanManager {
   }
 }
 
-class ProcessManager {
+class RunList {
   constructor() {
-    this.promiseChain = Promise.resolve()
-    this.shouldExit = false
+    this.list = new Set()
   }
 
-  schedule(processFn) {
+  reset() {
+    this.list.clear()
+    this.all = false
+  }
+
+  runAll() {
+    this.all = true
+  }
+
+  concat(files) {
+    files.forEach(f => this.list.add(f))
+  }
+
+  value() {
+    if (this.all) return "all"
+    return Array.from(this.list)
+  }
+
+  any() {
+    if (this.all) return true
+    return this.list.size > 0
+  }
+}
+
+class ProcessManager {
+  constructor() {
+    this.shouldExit = false
+    this.queues = {} // keyed by process type, values are args to run next time we run this process type
+    this.processes = {}
+    this.process_priority = []
+    this.timeout = null
+  }
+
+  schedule(type, files) {
+    if (this.shouldExit) return
+    if (!(type in this.processes)) throw new Error(`Process type ${type} is not known`)
+
+    if (files === "all") {
+      this.queues[type].runAll()
+    } else {
+      this.queues[type].concat(files)
+    }
+
+    /* console.log({ queues: JSON.stringify(this.queues, 2) }) */
+    if (!this.timeout) {
+      this.timeout = setTimeout(() => this.runNext(), 100)
+    }
+  }
+
+  async runNext() {
     if (this.shouldExit) return
 
-    this.promiseChain = this.promiseChain
-      .then(() => {
-        if (this.shouldExit) return false
-        return processFn()
-      })
-      .catch(err => {
-        console.error(`Error from ${processFn}:`, err)
-      })
+    const type = this.process_priority.find(t => this.queues[t].any())
+
+    if (!type) {
+      this.timeout = null
+      return
+    }
+
+    const proc = this.processes[type]
+    let files = this.queues[type].value()
+    if (files === "all") files = proc.allArgs
+    const args = proc.argsFn(files)
+
+    this.queues[type].reset()
+
+    await spawnProcessP({
+      name: type,
+      execName: proc.execPath,
+      args,
+    })
+
+    this.timeout = setTimeout(() => this.runNext(), 100)
+  }
+
+  defineProcess(type, { argsFn, execPath = process.execPath, allArgs = [] }) {
+    if (type in this.processes) throw new Error(`Process "${type}" is already defined!`)
+    this.processes[type] = {
+      argsFn,
+      execPath,
+      allArgs,
+    }
+    this.process_priority.push(type)
+    this.queues[type] = new RunList()
+    return this
   }
 
   exit() {
@@ -164,6 +205,18 @@ class ProcessManager {
 
 const root = path.dirname(__dirname)
 const procManager = new ProcessManager()
+  .defineProcess("Prettier", {
+    argsFn: files => ["node_modules/.bin/prettier", "--loglevel", "warn", "--write", ...files],
+    allArgs: [".babelrc", ".eslintrc", "bin/test-watch", "**/*.{js,jsx,json,yaml,md}"],
+  })
+  .defineProcess("ESLint", {
+    argsFn: files => ["node_modules/.bin/eslint", "--ext", "js,jsx", ...files],
+    allArgs: ["."],
+  })
+  .defineProcess("Jest", {
+    argsFn: files => ["node_modules/.bin/jest", ...files],
+    allArgs: [],
+  })
 
 const standardExclusions = [
   ["not", ["ipcre", "^(node_modules|tmp|log|public)", "wholename"]],
@@ -196,9 +249,9 @@ const prettierConfig = {
       })
       if (runList.length === 0) return
       if (runAll) {
-        procManager.schedule(runPrettierAll)
+        procManager.schedule("Prettier", "all")
       } else {
-        procManager.schedule(() => runPrettier(runList))
+        procManager.schedule("Prettier", runList)
       }
     },
   ],
@@ -217,14 +270,14 @@ const lintConfig = {
   handlers: [
     ({ files, is_fresh_instance: isFresh }) => {
       if (isFresh) {
-        procManager.schedule(runLintAll)
+        procManager.schedule("ESLint", "all")
         return
       }
       const filesToLint = files
         .filter(f => f.exists)
         .map(f => (path.basename(f.name) === ".eslintrc" ? path.dirname(f.name) : f.name))
       if (filesToLint.length === 0) return
-      procManager.schedule(() => runLint(filesToLint))
+      procManager.schedule("ESLint", filesToLint)
     },
   ],
 }
@@ -252,9 +305,9 @@ const testConfig = {
 
       if (!runAll && testFiles.length === 0) return
       if (runAll) {
-        procManager.schedule(runJestAll)
+        procManager.schedule("Jest", "all")
       } else {
-        procManager.schedule(() => runJest(testFiles))
+        procManager.schedule("Jest", testFiles)
       }
     },
   ],
@@ -282,18 +335,18 @@ process.stdin.setEncoding("utf8")
 process.stdin.on("data", chunk => {
   switch (chunk.trim()) {
     case "":
-      procManager.schedule(runPrettierAll)
-      procManager.schedule(runLintAll)
-      procManager.schedule(runJestAll)
+      procManager.schedule("Prettier", "all")
+      procManager.schedule("ESLint", "all")
+      procManager.schedule("Jest", "all")
       break
     case "t":
-      procManager.schedule(runJestAll)
+      procManager.schedule("Jest", "all")
       break
     case "p":
-      procManager.schedule(runPrettierAll)
+      procManager.schedule("Prettier", "all")
       break
     case "l":
-      procManager.schedule(runLintAll)
+      procManager.schedule("ESLint", "all")
       break
     case "q":
       exit()
