@@ -23,7 +23,8 @@
         "optionalDependencies": false
       }
     ],
-    "react/no-array-index-key": "warn"
+    "react/no-array-index-key": "warn",
+    "class-methods-use-this": "off"
   },
   "overrides": [
     {

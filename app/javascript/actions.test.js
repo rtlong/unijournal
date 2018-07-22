@@ -3,7 +3,7 @@ import util from "util"
 import expect from "expect"
 import fetch from "cross-fetch"
 
-import { mockStore } from "../../test-helper"
+import { mockStore } from "../../lib/javascript/test/mock_store"
 import {
   MESSAGES_ADD,
   MESSAGES_DEL,
