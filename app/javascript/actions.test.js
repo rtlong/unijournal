@@ -67,14 +67,21 @@ describe("actions", () => {
       const store = mockStore(state)
 
       await store.dispatch(createPost())
+      jest.runAllTimers()
       expect(postJSON).toHaveBeenCalledWith("/posts", { body })
-      expect(store.getActions()).toEqual([
+      const dispatchedActions = store.getActions()
+      const idMatcher = expect.any(Number)
+      expect(dispatchedActions).toEqual([
         addPost({
           id: parsedJson.id,
           body: parsedJson.body,
           timestamp: new Date(parsedJson.created_at),
         }),
+        addMessage(idMatcher, "info", expect.stringMatching(/saved/i)),
+        deleteMessage(idMatcher),
       ])
+      // ensure the IDs used are the same
+      expect(dispatchedActions[1].payload.id).toEqual(dispatchedActions[2].payload.id)
     })
 
     describe("on error", () => {

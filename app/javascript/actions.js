@@ -127,6 +127,7 @@ export function createPost() {
       }
       const json = await response.json()
       dispatch(addPost(Posts.deserialize(json)))
+      dispatch(showMessage("New post saved"))
     } catch (err) {
       dispatch(showError(`Error during POST /posts: ${err}`))
     }
