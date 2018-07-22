@@ -1,43 +1,30 @@
-export const empty = {
-  next_id: 0,
-  by_id: {},
-  ids: [],
-}
+import { Map } from "immutable"
 
+export const empty = new Map()
+
+function nextId(posts) {
+  return posts.size === 0 ? 0 : posts.keySeq().max() + 1
+}
 export function all(posts) {
-  return posts.ids.map(id => posts.by_id[id])
+  return posts.valueSeq().toJS()
 }
 
 export function get(posts, id) {
-  if (posts.ids.indexOf(id) === -1) throw new Error(`Post ${id} not found`)
-  return posts.by_id[id]
+  if (!posts.has(id)) throw new Error(`Post ${id} not found`)
+  return posts.get(id)
 }
 
 export function add(posts, post) {
-  const id = post.id || posts.next_id
-  return {
-    ...posts,
-    next_id: Math.max(posts.next_id, id + 1),
-    by_id: {
-      ...posts.by_id,
-      [id]: {
-        ...post,
-        id,
-      },
-    },
-    ids: [...posts.ids, id],
+  const newPost = {
+    id: nextId(posts),
+    ...post,
   }
+  return posts.set(newPost.id, newPost)
 }
 
 export function update(posts, id, post) {
-  if (posts.ids.indexOf(id) === -1) throw new Error(`Post ${id} not found`)
-  return {
-    ...posts,
-    by_id: {
-      ...posts.by_id,
-      [id]: post,
-    },
-  }
+  if (!posts.has(id)) throw new Error(`Post ${id} not found`)
+  return posts.set(id, post)
 }
 
 // naming this is stumping me... it takes in *an Object* (already deserialized from JSON coming from Rails) and converts to the shape that we use in the state
