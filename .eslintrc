@@ -9,6 +9,7 @@
           "test/**",
           "tests/**",
           "spec/**",
+          "lib/javascript/test/**",
           "**/__tests__/**",
           "**/__mocks__/**",
           "test.{js,jsx}",
