@@ -6,17 +6,17 @@ import { spawn } from "child_process"
 import chalk from "chalk"
 import Watchman from "fb-watchman"
 
-const testFilePattern = /\.test\.jsx?$/
+const jsTestFilePattern = /\.test\.jsx?$/
 
-function spawnProcessP({ name, args, execName = process.execPath }) {
+function spawnProcessP({ name, args, execPath = process.execPath }) {
   return new Promise((resolve, reject) => {
-    /* console.log({ name, execName, args }) */
+    /* console.log({ name, execPath, args }) */
     console.log(
       chalk.blue(
-        `>>> ${name}: ${execName === process.execPath ? "node" : execName} ${args.join(" ")}`,
+        `>>> ${name}: ${execPath === process.execPath ? "node" : execPath} ${args.join(" ")}`,
       ),
     )
-    spawn(execName, args, { stdio: "inherit" })
+    spawn(execPath, args, { stdio: "inherit" })
       .on("error", err => {
         console.error(`error spawning ${name}`, err)
         reject(err)
@@ -54,21 +54,25 @@ class WatchmanManager {
 
   async start() {
     await this.init()
-    this.roots.forEach(async rootConfig => {
-      const { root, subscriptions } = rootConfig
-      await this.watchProject({ root })
-      subscriptions.forEach(async ({ name, config, handlers = [] }) => {
-        handlers.forEach(handler => {
-          this.client.on("subscription", event => {
-            const { subscription } = event
-            if (subscription !== name) return
-            /* console.log({ subscription, files: event.files }) */
-            handler(event)
-          })
-        })
-        await this.subscribe({ root, sub: config, name })
-      })
-    })
+    return Promise.all(
+      this.roots.map(async rootConfig => {
+        const { root, subscriptions } = rootConfig
+        await this.watchProject({ root })
+        return Promise.all(
+          subscriptions.map(async ({ name, config, handlers = [] }) => {
+            handlers.forEach(handler => {
+              this.client.on("subscription", event => {
+                const { subscription } = event
+                if (subscription !== name) return
+                /* console.log({ subscription, files: event.files }) */
+                handler(event)
+              })
+            })
+            await this.subscribe({ root, sub: config, name })
+          }),
+        )
+      }),
+    )
   }
 
   init() {
@@ -178,7 +182,7 @@ class ProcessManager {
 
     await spawnProcessP({
       name: type,
-      execName: proc.execPath,
+      execPath: proc.execPath,
       args,
     })
 
@@ -211,11 +215,21 @@ const procManager = new ProcessManager()
   })
   .defineProcess("ESLint", {
     argsFn: files => ["node_modules/.bin/eslint", "--ext", "js,jsx", ...files],
-    allArgs: ["."],
+    allArgs: [".", __filename],
   })
   .defineProcess("Jest", {
     argsFn: files => ["node_modules/.bin/jest", ...files],
     allArgs: [],
+  })
+  .defineProcess("Rubocop", {
+    argsFn: files => ["bin/rubocop", ...files],
+    allArgs: [],
+    execPath: "ruby",
+  })
+  .defineProcess("Rails-Test", {
+    argsFn: files => ["bin/rails", "test", ...files],
+    allArgs: [],
+    execPath: "ruby",
   })
 
 const standardExclusions = [
@@ -230,7 +244,7 @@ const prettierConfig = {
       "allof",
       [
         "anyof",
-        ["ipcre", "\\.(jsx?|json|ya?ml)$"],
+        ["ipcre", "\\.(jsx?|json|ya?ml|md)$"],
         ["match", ".eslintrc"],
         ["match", ".babelrc"],
         ["match", "test-watch"],
@@ -283,7 +297,7 @@ const lintConfig = {
 }
 
 const testConfig = {
-  name: "test",
+  name: "js-test",
   config: {
     expression: [
       "allof",
@@ -297,18 +311,74 @@ const testConfig = {
     ({ files }) => {
       const testFiles = []
       const runAll = files.some(file => {
-        const isTestFile = testFilePattern.test(file.name)
+        const isTestFile = jsTestFilePattern.test(file.name)
         if (!isTestFile) return true // if event includes any non-tests, short-circuit .some() to exit iteration and runAll = true
         if (file.exists) testFiles.push(file.name) // still existing test file, add to list
         return false
       })
 
-      if (!runAll && testFiles.length === 0) return
-      if (runAll) {
-        procManager.schedule("Jest", "all")
-      } else {
-        procManager.schedule("Jest", testFiles)
+      if (runAll) procManager.schedule("Jest", "all")
+      if (testFiles.length > 0) procManager.schedule("Jest", testFiles)
+    },
+  ],
+}
+
+const rubyTestFilePattern = /_test\.rb$/
+const rubyTestConfig = {
+  name: "ruby-test",
+  config: {
+    expression: ["allof", ["ipcre", ".rb?$"], ...standardExclusions],
+    fields: ["name", "exists"],
+  },
+  handlers: [
+    ({ files, is_fresh_instance: isFresh }) => {
+      if (isFresh) {
+        procManager.schedule("Rails-Test", "all")
+        return
       }
+
+      const testFiles = []
+      const runAll = files.some(file => {
+        const isTestFile = rubyTestFilePattern.test(file.name)
+        if (!isTestFile) return true // if event includes any non-tests, short-circuit .some() to exit iteration and runAll = true
+        if (file.exists) testFiles.push(file.name) // still existing test file, add to list
+        return false
+      })
+
+      if (runAll) procManager.schedule("Rails-Test", "all")
+      if (testFiles.length > 0) procManager.schedule("Rails-Test", testFiles)
+    },
+  ],
+}
+
+const rubocopConfigFile = ".rubocop.yml"
+const rubyLintConfig = {
+  name: "ruby-lint",
+  config: {
+    expression: [
+      "allof",
+      ["anyof", ["ipcre", ".rb?$"], ["match", rubocopConfigFile]],
+      ...standardExclusions,
+    ],
+    fields: ["name", "exists"],
+  },
+  handlers: [
+    ({ files, is_fresh_instance: isFresh }) => {
+      if (isFresh) {
+        procManager.schedule("Rubocop", "all")
+        return
+      }
+
+      const runList = []
+      const runAll = files.some(file => {
+        const isConfigFile = file.name === rubocopConfigFile
+        if (isConfigFile) return true // if event includes config, lint all
+        if (file.exists) runList.push(file.name)
+        return false
+      })
+
+      if (runAll) procManager.schedule("Rubocop", "all")
+      if (runList.length > 0) procManager.schedule("Rubocop", runList)
     },
   ],
 }
@@ -316,10 +386,9 @@ const testConfig = {
 const watchmanManager = new WatchmanManager([
   {
     root,
-    subscriptions: [prettierConfig, lintConfig, testConfig],
+    subscriptions: [prettierConfig, lintConfig, testConfig, rubyLintConfig, rubyTestConfig],
   },
 ])
-watchmanManager.start()
 
 function exit() {
   console.log("exiting...")
@@ -330,30 +399,39 @@ function exit() {
   /* process.exit() */
 }
 
-process.stdin.resume()
-process.stdin.setEncoding("utf8")
-process.stdin.on("data", chunk => {
-  switch (chunk.trim()) {
-    case "":
-      procManager.schedule("Prettier", "all")
-      procManager.schedule("ESLint", "all")
-      procManager.schedule("Jest", "all")
-      break
-    case "t":
-      procManager.schedule("Jest", "all")
-      break
-    case "p":
-      procManager.schedule("Prettier", "all")
-      break
-    case "l":
-      procManager.schedule("ESLint", "all")
-      break
-    case "q":
-      exit()
-      break
-    default:
-      console.log({ chunk })
-  }
-})
+function main() {
+  watchmanManager.start().catch(err => {
+    console.log(err)
+    exit()
+  })
 
-process.on("SIGINT", exit)
+  process.stdin.resume()
+  process.stdin.setEncoding("utf8")
+  process.stdin.on("data", chunk => {
+    switch (chunk.trim()) {
+      case "":
+        procManager.schedule("Prettier", "all")
+        procManager.schedule("ESLint", "all")
+        procManager.schedule("Jest", "all")
+        break
+      case "t":
+        procManager.schedule("Jest", "all")
+        break
+      case "p":
+        procManager.schedule("Prettier", "all")
+        break
+      case "l":
+        procManager.schedule("ESLint", "all")
+        break
+      case "q":
+        exit()
+        break
+      default:
+        console.log({ chunk })
+    }
+  })
+
+  process.on("SIGINT", exit)
+}
+
+main()
