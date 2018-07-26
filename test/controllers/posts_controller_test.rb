@@ -16,6 +16,7 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
       assert_equal 'application/json', @response.content_type
 
       parsed_response = JSON.parse(@response.body)
+      assert_equal expected_posts.length, parsed_response.length
 
       %i[id body].each do |attr|
         assert_equal expected_posts.map(&attr),
@@ -24,8 +25,8 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
       assert_equal expected_posts.map(&:created_at).map(&:to_json),
                    (parsed_response.map { |h| h.fetch('created_at').to_json })
 
-      assert_equal expected_posts.map(&:tags).map(&:to_json),
-                   (parsed_response.map { |h| h.fetch('tags').to_json })
+      assert_equal expected_posts.map(&:tag_names),
+                   (parsed_response.map { |h| h.fetch('tag_names') })
     end
   end
 end

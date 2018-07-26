@@ -15,7 +15,7 @@ class PostTest < ActiveSupport::TestCase
     expected_names = %w[thisisa-hashtag heres_another foo]
 
     p = Post.create!(body: body)
-    assert_equal p.tags_names, expected_names
+    assert_equal p.tag_names, expected_names
     # each name now corresponds to a Tag with that name
     assert_equal p.tags.map(&:persisted?), [true, true, true]
     assert_equal Tag.where(name: expected_names).all, p.tags

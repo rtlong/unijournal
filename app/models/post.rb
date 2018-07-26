@@ -9,6 +9,10 @@ class Post < ApplicationRecord
     self.tag_names = body.scan(/#([[:alnum:]_-]+)\b/).flatten
   end
 
+  def tag_names
+    tags.map(&:name)
+  end
+
   def tag_names=(names)
     self.tags = names.map { |name|
       Tag.where(name: name).first_or_initialize

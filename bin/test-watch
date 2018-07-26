@@ -413,15 +413,19 @@ function main() {
         procManager.schedule("Prettier", "all")
         procManager.schedule("ESLint", "all")
         procManager.schedule("Jest", "all")
+        procManager.schedule("Rubocop", "all")
+        procManager.schedule("Rails-Test", "all")
         break
       case "t":
         procManager.schedule("Jest", "all")
+        procManager.schedule("Rails-Test", "all")
         break
       case "p":
         procManager.schedule("Prettier", "all")
         break
       case "l":
         procManager.schedule("ESLint", "all")
+        procManager.schedule("Rubocop", "all")
         break
       case "q":
         exit()

@@ -1,9 +1,9 @@
 class PostsController < ApplicationController
   def index
-    posts = Post.limit(10).order(created_at: :desc).to_a
+    @posts = Post.limit(10).order(created_at: :desc).to_a
 
     respond_to do |format|
-      format.json { render json: posts }
+      format.json
     end
   end
 
