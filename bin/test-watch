@@ -387,7 +387,7 @@ const rubyLintConfig = {
 const watchmanManager = new WatchmanManager([
   {
     root,
-    subscriptions: [prettierConfig, lintConfig, testConfig, rubyLintConfig, rubyTestConfig],
+    subscriptions: [prettierConfig, lintConfig, testConfig /* rubyLintConfig, rubyTestConfig */],
   },
 ])
 

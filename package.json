@@ -2,7 +2,8 @@
   "name": "unijournal",
   "private": true,
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint --ext js,jsx"
   },
   "dependencies": {
     "@rails/webpacker": "3.5",
