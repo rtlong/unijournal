@@ -9,7 +9,7 @@ class Types::QueryType < Types::BaseObject
 
   def posts(since: false, limit: 10)
     t = Post.arel_table
-    rel = Post.order(created_at: :desc)
+    rel = Post.order(created_at: :desc).includes(:tags)
     rel = rel.where(t[:created_at].gteq(since)) if since
     rel = rel.limit(limit)
     rel
