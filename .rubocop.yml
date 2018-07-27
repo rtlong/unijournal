@@ -5,6 +5,9 @@ AllCops:
     - 'elm-stuff/**/*'
     - 'db/schema.rb'
 
+Metrics/MethodLength:
+  Max: 20
+
 Style/FrozenStringLiteralComment:
   Enabled: false
 

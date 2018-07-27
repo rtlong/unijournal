@@ -371,7 +371,8 @@ const rubyLintConfig = {
 
       const runList = []
       const runAll = files.some(file => {
-        const isConfigFile = file.name === rubocopConfigFile
+        /* console.log(file) */
+        const isConfigFile = path.basename(file.name) === rubocopConfigFile
         if (isConfigFile) return true // if event includes config, lint all
         if (file.exists) runList.push(file.name)
         return false
