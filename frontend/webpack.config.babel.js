@@ -8,18 +8,18 @@ const isProd = process.env.NODE_ENV === "production"
 
 export default {
   mode: isProd ? "production" : "development",
-  context: path.resolve(__dirname, "app/javascript"),
-  entry: { react_entry: "./packs/react_entry.jsx" },
+  context: path.resolve(__dirname, "src"),
+  entry: { main: "./packs/main.jsx" },
   output: {
     filename: isProd ? "[name]-[chunkhash].js" : "[name].js",
-    path: path.resolve(__dirname, "public/packs"),
+    path: path.resolve(__dirname, "dist"),
     publicPath: "/",
     crossOriginLoading: "anonymous",
   },
   resolve: {
     extensions: [".jsx", ".js", ".css", ".png", ".svg", ".gif", ".jpeg", ".jpg"],
     modules: [
-      // "app/javascript",
+      // 'src',
       "node_modules",
     ],
   },

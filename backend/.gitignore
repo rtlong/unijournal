@@ -1,0 +1,9 @@
+/.bundle
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/storage/*
+.byebug_history
+/config/master.key
+.rubocop-http*yml

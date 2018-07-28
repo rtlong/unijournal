@@ -107,13 +107,13 @@ module.exports = {
   // rootDir: null,
 
   // A list of paths to directories that Jest should use to search for files in
-  roots: ["app/javascript/"],
+  roots: ["src/"],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  setupFiles: ["./lib/javascript/test/init-enzyme"],
+  setupFiles: ["./test/init-enzyme"],
 
   // The path to a module that runs some code to configure or set up the testing framework before each test
   // setupTestFrameworkScriptFile: "./lib/javascript/test/setup-test-framework",
@@ -151,7 +151,7 @@ module.exports = {
   // testRunner: "jasmine2",
 
   // This option sets the URL for the jsdom environment. It is reflected in properties such as location.href
-  // testURL: "about:blank",
+  testURL: 'http://localhost'
 
   // Setting this value to "fake" allows the use of fake timers for functions such as "setTimeout"
   // timers: "real",
