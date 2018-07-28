@@ -6,36 +6,20 @@ import { Provider } from "react-redux"
 
 import App from "../app"
 import reducer from "../reducer"
-import * as Posts from "../entities/posts"
-
 import * as actions from "../actions"
 
+// eslint-disable-next-line no-underscore-dangle
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+const store = createStore(reducer, undefined, composeEnhancers(applyMiddleware(ReduxThunk)))
+
 global.actions = actions
+global.store = store
 
-// given window.pageState, convert values as needed
-function convertPageState(pageState = undefined) {
-  if (!pageState) return undefined
-  return {
-    ...pageState,
-    posts: Posts.load(pageState.posts),
-  }
-}
+global.apiEndpoint = document.querySelector('meta[name="api-endpoint"]').getAttribute("content")
 
-function setupStore() {
-  const state = convertPageState(window.pageState)
-
-  // eslint-disable-next-line no-underscore-dangle
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-
-  return createStore(reducer, state, composeEnhancers(applyMiddleware(ReduxThunk)))
-}
+store.dispatch(actions.fetchPosts())
 
 document.addEventListener("DOMContentLoaded", () => {
-  const store = setupStore()
-  global.store = store
-
-  store.dispatch(actions.fetchPosts())
-
   ReactDOM.render(
     <Provider store={store}>
       <App />

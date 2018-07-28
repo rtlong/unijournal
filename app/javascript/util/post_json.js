@@ -1,7 +1,5 @@
 import fetch from "cross-fetch"
 
-import { csrfToken } from "./rails"
-
 export default function postJSON(url, data) {
   // Default options are marked with *
   return fetch(url, {
@@ -11,7 +9,6 @@ export default function postJSON(url, data) {
     credentials: "same-origin", // include, same-origin, *omit
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "X-CSRF-Token": csrfToken(),
     },
     redirect: "follow", // manual, *follow, error
     referrer: "no-referrer", // no-referrer, *client

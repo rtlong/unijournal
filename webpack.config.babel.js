@@ -1,6 +1,8 @@
 import path from "path"
 
 import WebpackAssetsManifest from "webpack-assets-manifest"
+import HtmlPlugin from "html-webpack-plugin"
+import SriPlugin from "webpack-subresource-integrity"
 
 const isProd = process.env.NODE_ENV === "production"
 
@@ -11,7 +13,8 @@ export default {
   output: {
     filename: isProd ? "[name]-[chunkhash].js" : "[name].js",
     path: path.resolve(__dirname, "public/packs"),
-    publicPath: "/packs/",
+    publicPath: "/",
+    crossOriginLoading: "anonymous",
   },
   resolve: {
     extensions: [".jsx", ".js", ".css", ".png", ".svg", ".gif", ".jpeg", ".jpg"],
@@ -27,6 +30,7 @@ export default {
   module: {
     rules: [
       {
+        test: /\.jsx?/,
         exclude: /node_modules/,
         use: [
           {
@@ -54,6 +58,17 @@ export default {
     new WebpackAssetsManifest({
       writeToDisk: true,
       integrity: true,
+    }),
+    new SriPlugin({
+      enabled: isProd,
+      hashFuncNames: ["sha256", "sha384", "sha512"],
+    }),
+    new HtmlPlugin({
+      template: "./index.html",
+      inject: false,
+      meta: {
+        "api-endpoint": "http://localhost:3000", // FIXME: change this at some point
+      },
     }),
   ],
 }

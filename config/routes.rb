@@ -6,4 +6,6 @@ Rails.application.routes.draw do
   post "/graphql", to: "graphql#execute"
 
   resources :posts
+
+  root to: ->(_) { [404, {}, ["hello"]] }
 end

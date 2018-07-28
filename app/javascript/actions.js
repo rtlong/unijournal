@@ -102,13 +102,17 @@ export function showError(err, timeout = 10000) {
 
 export function fetchPosts() {
   return async dispatch => {
-    const response = await fetch("/posts", { method: "GET" })
-    if (!response.ok) {
-      dispatch(showError("Error during GET /posts"))
-      return
+    try {
+      const response = await fetch(`${global.apiEndpoint}/posts`, { method: "GET" })
+      if (!response.ok) {
+        dispatch(showError("Error loading posts"))
+        return
+      }
+      const json = await response.json()
+      dispatch(receivePosts(json))
+    } catch (err) {
+      dispatch(showError(`Error loading posts: ${err}`))
     }
-    const json = await response.json()
-    dispatch(receivePosts(json))
   }
 }
 
@@ -118,7 +122,7 @@ export function createPost() {
     if (!postBody) return
 
     try {
-      const response = await postJSON("/posts", {
+      const response = await postJSON(`${global.apiEndpoint}/posts`, {
         body: postBody,
       })
       if (!response.ok) {

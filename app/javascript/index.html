@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <% for (var name in htmlWebpackPlugin.options.meta) { %>
+    <meta name="<%= name %>" content="<%= htmlWebpackPlugin.options.meta[name] %>">
+    <% } %>
+    <% for (var index in htmlWebpackPlugin.files.js) { %>
+    <script
+      defer
+      src="<%= htmlWebpackPlugin.files.js[index] %>"
+            <% if (htmlWebpackPlugin.files.jsIntegrity) { %>
+              integrity="<%= htmlWebpackPlugin.files.jsIntegrity[index] %>"
+            <% } %>
+            crossorigin="<%= webpackConfig.output.crossOriginLoading %>"
+            ></script>
+    <% } %>
+
+    <% for (var index in htmlWebpackPlugin.files.css) { %>
+    <link
+      rel="stylesheet"
+      href="<%= htmlWebpackPlugin.files.css[index] %>"
+      <% if (htmlWebpackPlugin.files.cssIntegrity) { %>
+        integrity="<%= htmlWebpackPlugin.files.cssIntegrity[index] %>"
+      <% } %>
+      crossorigin="<%= webpackConfig.output.crossOriginLoading %>"
+    />
+    <% } %>
+  </head>
+  <body>
+  </body>
+</html>
