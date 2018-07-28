@@ -39,6 +39,8 @@ const initialState = reducer(undefined, { type: "@@redux/INIT-test" })
 describe("actions", () => {
   beforeEach(() => {
     jest.useFakeTimers()
+
+    global.apiEndpoint = "" // FIXME
   })
 
   afterEach(() => {
