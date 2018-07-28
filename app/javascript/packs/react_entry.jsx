@@ -19,11 +19,17 @@ global.apiEndpoint = document.querySelector('meta[name="api-endpoint"]').getAttr
 
 store.dispatch(actions.fetchPosts())
 
-document.addEventListener("DOMContentLoaded", () => {
+const mountApp = () => {
   ReactDOM.render(
     <Provider store={store}>
       <App />
     </Provider>,
     document.body.appendChild(document.createElement("div")),
   )
-})
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mountApp)
+} else {
+  mountApp()
+}

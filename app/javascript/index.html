@@ -8,7 +8,7 @@
     <% } %>
     <% for (var index in htmlWebpackPlugin.files.js) { %>
     <script
-      defer
+      async
       src="<%= htmlWebpackPlugin.files.js[index] %>"
             <% if (htmlWebpackPlugin.files.jsIntegrity) { %>
               integrity="<%= htmlWebpackPlugin.files.jsIntegrity[index] %>"
