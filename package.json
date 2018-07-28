@@ -6,7 +6,6 @@
     "lint": "eslint --ext js,jsx"
   },
   "dependencies": {
-    "@rails/webpacker": "3.5",
     "babel-core": "^6.26.3",
     "babel-preset-react": "^6.24.1",
     "babel-runtime": "^6.26.0",
@@ -24,6 +23,9 @@
   },
   "devDependencies": {
     "babel-eslint": "^8.2.6",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-3": "^6.24.1",
@@ -39,6 +41,7 @@
     "eslint-plugin-react": "^7.9.1",
     "expect": "21",
     "fb-watchman": "^2.0.0",
+    "file-loader": "^1.1.11",
     "jest": "^23.4.1",
     "jest-mock": "^23.2.0",
     "jsdom": "^11.11.0",
@@ -47,7 +50,9 @@
     "redux-mock-store": "^1.5.3",
     "tape": "^4.9.1",
     "tern": "^0.21.0",
-    "webpack": "^3.0.0",
-    "webpack-dev-server": "2.11.2"
+    "webpack": "^4.16.3",
+    "webpack-assets-manifest": "^3.0.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-serve": "^2.0.2"
   }
 }
