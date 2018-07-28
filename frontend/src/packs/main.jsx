@@ -15,9 +15,7 @@ const store = createStore(reducer, undefined, composeEnhancers(applyMiddleware(R
 global.actions = actions
 global.store = store
 
-global.apiEndpoint = document.querySelector('meta[name="api-endpoint"]').getAttribute("content")
-
-store.dispatch(actions.fetchPosts())
+store.dispatch(actions.loadLocalStorage())
 
 const mountApp = () => {
   ReactDOM.render(

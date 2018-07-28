@@ -66,9 +66,6 @@ export default {
     new HtmlPlugin({
       template: "./index.html",
       inject: false,
-      meta: {
-        "api-endpoint": "http://localhost:3000", // FIXME: change this at some point
-      },
     }),
   ],
 }

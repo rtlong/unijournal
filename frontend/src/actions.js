@@ -137,3 +137,9 @@ export function createPost() {
     }
   }
 }
+
+export function loadLocalStorage() {
+  return async (dispatch, getState) => {
+    dispatch(showError("loadLocalStorage: Not implemented"))
+  }
+}
