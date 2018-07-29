@@ -1,5 +1,6 @@
 import path from "path"
 
+import { ProvidePlugin } from "webpack"
 import WebpackAssetsManifest from "webpack-assets-manifest"
 import HtmlPlugin from "html-webpack-plugin"
 import SriPlugin from "webpack-subresource-integrity"
@@ -22,6 +23,14 @@ export default {
       // 'src',
       "node_modules",
     ],
+    alias: {
+      fs: "browserfs/dist/shims/fs.js",
+      buffer: "browserfs/dist/shims/buffer.js",
+      path: "browserfs/dist/shims/path.js",
+      processGlobal: "browserfs/dist/shims/process.js",
+      bufferGlobal: "browserfs/dist/shims/bufferGlobal.js",
+      bfsGlobal: require.resolve("browserfs"),
+    },
   },
   resolveLoader: {
     modules: ["node_modules"],
@@ -53,8 +62,14 @@ export default {
       //   ],
       // },
     ],
+    noParse: [/browserfs\.js/],
   },
   plugins: [
+    new ProvidePlugin({
+      BrowserFS: "bfsGlobal",
+      process: "processGlobal",
+      Buffer: "bufferGlobal",
+    }),
     new WebpackAssetsManifest({
       writeToDisk: true,
       integrity: true,
@@ -68,4 +83,8 @@ export default {
       inject: false,
     }),
   ],
+  node: {
+    process: false,
+    Buffer: false,
+  },
 }

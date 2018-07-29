@@ -1,6 +1,7 @@
 import fetch from "cross-fetch"
+import uuid from "uuid/v4"
 
-import postJSON from "./util/post_json"
+import Storage from "./storage"
 import * as Posts from "./entities/posts"
 import {
   NEW_POST_FORM_EXPAND,
@@ -12,6 +13,23 @@ import {
   POSTS_RECEIVE,
   POSTS_UPDATE,
 } from "./action_types"
+
+function logMessage({ type, message }) {
+  /* eslint-disable no-console */
+  switch (type) {
+    case "error":
+      console.error(message)
+      break
+    case "debug":
+      console.debug(message)
+      break
+    case "info":
+      console.info(message)
+      break
+    default:
+      console.log(message)
+  }
+}
 
 export function newPostFormOpen() {
   return {
@@ -44,7 +62,7 @@ export function deleteMessage(id) {
 }
 
 export function addMessage(id, type, message) {
-  return {
+  const m = {
     type: MESSAGES_ADD,
     payload: {
       id,
@@ -52,6 +70,8 @@ export function addMessage(id, type, message) {
       message,
     },
   }
+  logMessage(m.payload)
+  return m
 }
 
 export function requestPosts() {
@@ -122,24 +142,38 @@ export function createPost() {
     if (!postBody) return
 
     try {
-      const response = await postJSON(`${global.apiEndpoint}/posts`, {
+      const {
+        repo: { dir },
+      } = getState()
+      const storage = new Storage({ dir })
+      const id = uuid()
+      const post = await storage.storePost({
+        id,
         body: postBody,
       })
-      if (!response.ok) {
-        dispatch(showError("Error during POST /posts"))
-        return
-      }
-      const json = await response.json()
-      dispatch(addPost(Posts.deserialize(json)))
+      dispatch(addPost(post))
       dispatch(showMessage("New post saved"))
     } catch (err) {
-      dispatch(showError(`Error during POST /posts: ${err}`))
+      dispatch(showError(`Error saving post: ${err}`))
     }
   }
 }
 
 export function loadLocalStorage() {
   return async (dispatch, getState) => {
-    dispatch(showError("loadLocalStorage: Not implemented"))
+    dispatch(showMessage("Loading local data"))
+
+    try {
+      const {
+        repo: { dir },
+      } = getState()
+      const storage = new Storage({ dir })
+      await storage.prepare()
+      await storage.loadPosts(post => {
+        dispatch(addPost(post))
+      })
+    } catch (err) {
+      dispatch(showError(`loadLocalStorage: ${err}`))
+    }
   }
 }
