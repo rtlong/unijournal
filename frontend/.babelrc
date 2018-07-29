@@ -17,5 +17,6 @@
     "syntax-dynamic-import",
     "transform-runtime",
     ["transform-class-properties", { spec: true }],
+    "react-hot-loader/babel",
   ],
 }

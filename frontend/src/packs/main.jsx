@@ -16,7 +16,7 @@ const mountApp = () => {
     <Provider store={store}>
       <App />
     </Provider>,
-    document.body.appendChild(document.createElement("div")),
+    document.getElementById("app"),
   )
 }
 

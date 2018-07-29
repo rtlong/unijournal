@@ -1,4 +1,5 @@
 import React from "react"
+import { hot } from "react-hot-loader"
 
 import PostList from "./containers/post-list"
 import NewPost from "./containers/new-post"
@@ -13,4 +14,4 @@ const App = () => (
   </div>
 )
 
-export default App
+export default hot(module)(App)
