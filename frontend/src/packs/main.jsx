@@ -9,15 +9,6 @@ import createStore from "../store"
 import App from "../app"
 import * as actions from "../actions"
 
-function mountApp(store) {
-  ReactDOM.render(
-    <Provider store={store}>
-      <App />
-    </Provider>,
-    document.getElementById("app"),
-  )
-}
-
 function configureBrowserFS(dispatch) {
   /* global BrowserFS */
   BrowserFS.configure(
@@ -43,8 +34,25 @@ function configureBrowserFS(dispatch) {
 
 const store = createStore()
 
-const pfs = pify(fs)
+configureBrowserFS(store.dispatch)
 
+const mountApp = ({ store }) => {
+  const app = (
+    <Provider store={store}>
+      <App />
+    </Provider>
+  )
+  ReactDOM.render(app, document.getElementById("app"))
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => mountApp({ store }))
+} else {
+  mountApp({ store })
+}
+
+// Export a global `d` object for debug purposes:
+const pfs = pify(fs)
 global.d = {
   actions,
   store,
@@ -78,10 +86,3 @@ global.d = {
     })
   },
 }
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => mountApp(store))
-} else {
-  mountApp(store)
-}
-configureBrowserFS(store.dispatch)
