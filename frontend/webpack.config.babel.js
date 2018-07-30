@@ -4,6 +4,8 @@ import { ProvidePlugin } from "webpack"
 import WebpackAssetsManifest from "webpack-assets-manifest"
 import HtmlPlugin from "html-webpack-plugin"
 import SriPlugin from "webpack-subresource-integrity"
+import koaConnect from "koa-connect"
+import historyApiFallback from "connect-history-api-fallback"
 
 const isProd = process.env.NODE_ENV === "production"
 
@@ -86,5 +88,10 @@ export default {
   node: {
     process: false,
     Buffer: false,
+  },
+  serve: {
+    add: (app, _middleware, _options) => {
+      app.use(koaConnect(historyApiFallback({})))
+    },
   },
 }
