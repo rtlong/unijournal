@@ -1,4 +1,4 @@
-import { empty, all, get, add, update, deserialize, load } from "./posts"
+import { empty, all, get, add, update, load } from "./posts"
 
 const unknownId = -1
 
@@ -18,11 +18,11 @@ function buildPost({ id = nextId(), body, timestamp = new Date() }) {
 }
 
 /* eslint-disable-next-line camelcase */
-function buildSerializedPost({ id = nextId(), body, created_at = new Date().toString() }) {
+function buildSerializedPost({ id = nextId(), body, timestamp = new Date().toString() }) {
   return {
     id,
     body,
-    created_at,
+    timestamp,
   }
 }
 
@@ -99,18 +99,6 @@ describe("entities/posts", () => {
     })
   })
 
-  describe(deserialize, () => {
-    test("returns the input with .created_at parsed and at .timestamp", () => {
-      const serializedPost = buildSerializedPost({ body: "foo bar" })
-
-      expect(deserialize(serializedPost)).toEqual({
-        id: serializedPost.id,
-        timestamp: new Date(serializedPost.created_at),
-        body: serializedPost.body,
-      })
-    })
-  })
-
   describe(load, () => {
     test("works", () => {
       const collection = [
@@ -118,7 +106,7 @@ describe("entities/posts", () => {
         buildSerializedPost({ body: "foo" }),
       ]
       const output = load(collection)
-      expect(all(output)).toEqual(collection.map(sp => deserialize(sp)))
+      expect(all(output)).toEqual(collection)
     })
   })
 })

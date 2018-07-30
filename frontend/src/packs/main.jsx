@@ -32,9 +32,33 @@ function configureBrowserFS(dispatch) {
   )
 }
 
+function parseAuthHash(hash) {
+  return hash
+    .slice(1)
+    .split("&")
+    .reduce((obj, part) => {
+      const [key, value] = part.split("=", 2)
+      obj[key] = value
+      return obj
+    }, {})
+}
+
+function getAuthFromURL(store) {
+  if (window.location.pathname !== "/auth") return
+  const hash = parseAuthHash(window.location.hash)
+  store.dispatch(
+    actions.authReturn({
+      token: hash.access_token,
+      state: hash.state,
+      type: hash.token_type,
+    }),
+  )
+}
+
 const store = createStore()
 
 configureBrowserFS(store.dispatch)
+getAuthFromURL(store)
 
 const mountApp = ({ store }) => {
   const app = (
@@ -59,6 +83,7 @@ global.d = {
   fs,
   git,
   pfs,
+  /* authRequest, */
 
   async commitAll() {
     const repo = {

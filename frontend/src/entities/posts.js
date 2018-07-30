@@ -27,11 +27,6 @@ export function update(state, id, post) {
   return state.set(id, post)
 }
 
-// naming this is stumping me... it takes in *an Object* (already deserialized from JSON coming from Rails) and converts to the shape that we use in the state
-export function deserialize(serializedPost) {
-  return serializedPost
-}
-
 export function load(collection) {
   return collection.reduce(add, empty)
 }
