@@ -1,5 +1,6 @@
 import fetch from "cross-fetch"
 import uuid from "uuid/v4"
+import Cookie from "js-cookie"
 
 import Storage from "./storage"
 import {
@@ -116,13 +117,8 @@ export function loadLocalStorage() {
   }
 }
 
-export function authReturn({ token, state, type }) {
-  console.log({ token, state, type })
+export function authReturn({ token }) {
   return async (dispatch, getState) => {
-    if (type !== "bearer") {
-      dispatch(showError("Auth: Invalid. Not bearer"))
-      return
-    }
     dispatch(showMessage(`Auth: Success. Token = ${token}`))
     dispatch(
       authReceiveCredentials({
@@ -133,8 +129,20 @@ export function authReturn({ token, state, type }) {
 
     // const tokenInfo = await gitlabRequest({ path: "/oauth/token/info", token })
     // console.log(tokenInfo)
-    const userInfo = await gitlabRequest({ path: "user", token })
-    dispatch(authReceiveUserInfo(userInfo))
+    try {
+      const userInfo = await gitlabRequest({ path: "user", token })
+      dispatch(authReceiveUserInfo(userInfo))
+    } catch (e) {
+      dispatch(authFailed(e))
+    }
+  }
+}
+
+export function authFailed(err) {
+  return async (dispatch, getState) => {
+    dispatch(showError(`Failed getting userInfo from Gitlab: ${err}`))
+    Cookie.remove("gitlab_token")
+    dispatch(authReceiveCredentials({}))
   }
 }
 
@@ -159,6 +167,6 @@ async function gitlabRequest({ path, method = "GET", token, body }) {
 export function authRequest() {
   const gitlabAppId = "4c908e2756054d83de294e38ad15bd59207e4a9806188dcddd1f68db93e34bf0"
   window.location.assign(
-    `https://gitlab.com/oauth/authorize?client_id=${gitlabAppId}&redirect_uri=http://localhost:3001/auth&response_type=token`,
+    `https://gitlab.com/oauth/authorize?client_id=${gitlabAppId}&redirect_uri=http://localhost:3001&response_type=token`,
   )
 }

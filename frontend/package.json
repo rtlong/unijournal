@@ -17,6 +17,7 @@
     "cross-fetch": "^2.2.2",
     "immutable": "^3.8.2",
     "isomorphic-git": "^0.24.2",
+    "js-cookie": "^2.2.0",
     "moment": "^2.22.2",
     "pify": "^3.0.0",
     "prop-types": "^15.6.2",

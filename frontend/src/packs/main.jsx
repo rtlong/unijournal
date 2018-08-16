@@ -1,6 +1,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 import { Provider } from "react-redux"
+import Cookie from "js-cookie"
 import * as git from "isomorphic-git"
 import fs from "fs"
 import pify from "pify"
@@ -44,21 +45,41 @@ function parseAuthHash(hash) {
 }
 
 function getAuthFromURL(store) {
-  if (window.location.pathname !== "/auth") return
+  if (!window.location.hash) return false
   const hash = parseAuthHash(window.location.hash)
+  window.location.hash = ""
+  const { token_type: type, access_token: token, state } = hash
+  console.log({ token, state, type })
+
+  if (type !== "bearer") {
+    store.dispatch(actions.showError("Auth: Invalid. Not bearer"))
+    return false
+  }
+
+  Cookie.set("gitlab_token", token)
   store.dispatch(
     actions.authReturn({
       token: hash.access_token,
-      state: hash.state,
-      type: hash.token_type,
     }),
   )
+  return true
+}
+
+function getAuthFromCookie(store) {
+  const token = Cookie.get("gitlab_token")
+  if (!token) return false
+  store.dispatch(
+    actions.authReturn({
+      token,
+    }),
+  )
+  return true
 }
 
 const store = createStore()
 
 configureBrowserFS(store.dispatch)
-getAuthFromURL(store)
+if (!getAuthFromCookie(store)) getAuthFromURL(store)
 
 const mountApp = ({ store }) => {
   const app = (
@@ -84,6 +105,7 @@ global.d = {
   git,
   pfs,
   /* authRequest, */
+  Cookie,
 
   async commitAll() {
     const repo = {

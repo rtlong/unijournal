@@ -45,7 +45,7 @@ export default class Storage {
 
   async loadPosts(cb = () => {}) {
     const entries = await pfs.readdir(this.path("posts"))
-    await Promise.all(
+    return Promise.all(
       entries.map(async filename => {
         const path = this.path(`posts/${filename}`)
         const stat = await pfs.stat(path)
@@ -62,9 +62,9 @@ export default class Storage {
   }
 
   async storePost({ id, body }) {
-    const path = this.path(`posts/${id}.md`)
-    await pfs.writeFile(path, body)
-    const stat = await pfs.stat(path)
+    const path = `posts/${id}.md`
+    const abspath = this.path(path)
+    await pfs.writeFile(abspath, body)
     await add({ ...this.repo, filepath: path })
     await commit({
       ...this.repo,
@@ -74,6 +74,7 @@ export default class Storage {
         email: "unijournal@rtlong.com",
       },
     })
+    const stat = await pfs.stat(abspath)
     return {
       id,
       body,
