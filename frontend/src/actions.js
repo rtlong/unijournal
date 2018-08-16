@@ -74,22 +74,6 @@ export function showError(err, timeout = 10000) {
   return showMessage(err, "error", timeout)
 }
 
-export function fetchPosts() {
-  return async dispatch => {
-    // try {
-    //   const response = await fetch(`${global.apiEndpoint}/posts`, { method: "GET" })
-    //   if (!response.ok) {
-    //     dispatch(showError("Error loading posts"))
-    //     return
-    //   }
-    //   const json = await response.json()
-    //   dispatch(receivePosts(json))
-    // } catch (err) {
-    //   dispatch(showError(`Error loading posts: ${err}`))
-    // }
-  }
-}
-
 export function createPost() {
   return async (dispatch, getState) => {
     const postBody = getState().newPostForm.source

@@ -19,7 +19,6 @@ import {
   addMessage,
   createPost,
   deleteMessage,
-  fetchPosts,
   newPostFormClose,
   newPostFormOpen,
   newPostSourceChanged,
@@ -156,55 +155,6 @@ describe("actions", () => {
 
       // ensure the IDs used are the same
       expect(dispatchedActions[0].payload.id).toEqual(dispatchedActions[1].payload.id)
-    })
-  })
-
-  describe.skip(fetchPosts, () => {
-    beforeEach(() => {
-      fetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            posts: [1, 2],
-          }),
-      })
-    })
-
-    test("it GETs /posts", async () => {
-      const store = mockStore(initialState)
-      await store.dispatch(fetchPosts())
-      expect(fetch).toHaveBeenCalledWith("/posts", { method: "GET" })
-    })
-
-    test("it dispatches POSTS_RECEIVE with response value", async () => {
-      const store = mockStore(initialState)
-      await store.dispatch(fetchPosts())
-      expect(store.getActions()).toEqual([
-        receivePosts({
-          posts: [1, 2],
-        }),
-      ])
-    })
-
-    describe("on error", () => {
-      test("it dispatches MESSAGES_ADD with error message", async () => {
-        fetch.mockResolvedValue({
-          ok: false,
-        })
-        const store = mockStore(initialState)
-
-        await store.dispatch(fetchPosts())
-        jest.runAllTimers()
-        const dispatchedActions = store.getActions()
-
-        expect(dispatchedActions).toEqual([
-          addMessage(expect.any(Number), "error", expect.stringMatching(/error/i)),
-          deleteMessage(expect.any(Number)),
-        ])
-
-        // ensure the IDs used are the same
-        expect(dispatchedActions[0].payload.id).toEqual(dispatchedActions[1].payload.id)
-      })
     })
   })
 
