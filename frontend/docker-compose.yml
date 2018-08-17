@@ -1,0 +1,14 @@
+version: '3.7'
+
+volumes:
+  couch_data: {}
+  couch_config: {}
+
+services:
+  couchdb:
+    image: couchdb:latest
+    volumes:
+      - 'couch_data:/opt/couchdb/data'
+      - 'couch_config:/opt/couchdb/etc'
+    ports:
+      - '5984:5984'
