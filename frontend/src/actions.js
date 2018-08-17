@@ -127,10 +127,11 @@ export function authReturn({ token }) {
       }),
     )
 
-    // const tokenInfo = await gitlabRequest({ path: "/oauth/token/info", token })
-    // console.log(tokenInfo)
     try {
-      const userInfo = await gitlabRequest({ path: "user", token })
+      // This endpoint doesn't support CORS :-(
+      // const tokenInfo = await gitlabRequest({ path: `/oauth/token/info?access_token=${token}` })
+
+      const userInfo = await gitlabAPIRequest({ path: "user", token })
       dispatch(authReceiveUserInfo(userInfo))
     } catch (e) {
       dispatch(authFailed(e))
@@ -146,13 +147,12 @@ export function authFailed(err) {
   }
 }
 
-async function gitlabRequest({ path, method = "GET", token, body }) {
-  const url = new URL(path, "https://gitlab.com/api/v4/")
-  const config = {
+export async function gitlabRequest({ path, headers = {}, method = "GET", body, config = {} }) {
+  const url = new URL(path, "https://gitlab.com/")
+  config = {
+    ...config,
     method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
   }
   if (method !== "GET" && body) {
     config.body = JSON.stringify(body)
@@ -164,9 +164,23 @@ async function gitlabRequest({ path, method = "GET", token, body }) {
   return response.json()
 }
 
+export async function gitlabAPIRequest({ path, method = "GET", token, body }) {
+  const url = `/api/v4/${path}`
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  }
+
+  return gitlabRequest({
+    path: url,
+    headers,
+    method,
+    body,
+  })
+}
+
 export function authRequest() {
   const gitlabAppId = "4c908e2756054d83de294e38ad15bd59207e4a9806188dcddd1f68db93e34bf0"
   window.location.assign(
-    `https://gitlab.com/oauth/authorize?client_id=${gitlabAppId}&redirect_uri=http://localhost:3001&response_type=token`,
+    `https://gitlab.com/oauth/authorize?client_id=${gitlabAppId}&response_type=token&redirect_uri=http://localhost:3001`,
   )
 }
