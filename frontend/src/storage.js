@@ -99,8 +99,23 @@ export default class Storage extends EventEmitter {
     // return this.db.
   }
 
-  async sync(remote) {
-    // await this.prepare()
-    return this.db.sync(remote)
+  startSync(remote) {
+    if (this.sync) throw new Error("sync already started")
+
+    this.sync = this.db
+      .sync(remote, {
+        live: true,
+        retry: true,
+      })
+      .on("complete", () => {
+        this.sync = undefined
+      })
+
+    return this.sync
+  }
+
+  stopSync() {
+    if (!this.sync) return false
+    return this.sync.cancel()
   }
 }
