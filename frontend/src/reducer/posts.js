@@ -1,8 +1,10 @@
 import * as Posts from "../entities/posts"
-import { POSTS_ADD, POSTS_RECEIVE } from "../action_types"
+import { LOGOUT, POSTS_ADD, POSTS_RECEIVE } from "../action_types"
 
 function postsReducer(state = Posts.empty, { type, payload }) {
   switch (type) {
+    case LOGOUT:
+      return Posts.empty
     case POSTS_ADD:
       return Posts.add(state, payload)
     case POSTS_RECEIVE:

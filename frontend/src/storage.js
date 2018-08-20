@@ -1,88 +1,106 @@
-import { basename } from "path"
-import fs from "fs" // provided by browserfs
-import { init, add, commit } from "isomorphic-git"
+import { EventEmitter } from "events"
+import { Buffer } from "buffer"
 
+import PouchDB from "pouchdb"
+import PouchBox from "pouch-box"
+import nacl from "tweetnacl"
+import naclUtil from "tweetnacl-util"
 import pify from "pify"
+import { pbkdf2 } from "pbkdf2"
 
-const pfs = pify(fs)
+nacl.util = naclUtil
+PouchDB.plugin(PouchBox)
 
-async function pathExists(path) {
-  try {
-    await pfs.stat(path)
-    return true
-  } catch (err) {
-    return false
-  }
+const converters = {
+  toDB({ id, timestamp, body, tags }) {
+    return {
+      _id: id,
+      type: "post",
+      timestamp,
+      box: {
+        body,
+        tags,
+      },
+    }
+  },
+
+  fromDB(doc) {
+    const { body, tags } = doc.box
+    return {
+      ...doc,
+      id: doc._id,
+      timestamp: new Date(doc.timestamp),
+      body,
+      tags,
+    }
+  },
 }
+export default class Storage extends EventEmitter {
+  constructor({ dbName }) {
+    super()
+    this.db = new PouchDB(dbName)
+    this.prepareProm = null
+    this.locked = true
+  }
 
-export default class Storage {
-  constructor({ dir }) {
-    this.dir = dir
-    this.repo = { dir: this.dir, fs }
+  async open(password) {
+    const salt = Buffer.from(nacl.hash(Uint8Array.from(this.db.name, c => c.codePointAt(0))))
+    const secretKey = await pify(pbkdf2)(password, salt, 10000, 32, "sha256")
+    const keypair = nacl.box.keyPair.fromSecretKey(secretKey)
+    this.prepareProm = this.db.box(keypair).then(permit => {
+      this.emit("unlocked", null)
+      this.locked = false
+      return permit
+    })
+    return this.prepareProm
+  }
+
+  close() {
+    this.db.closeBox()
+    this.locked = true
+    this.prepareProm = null
+    this.emit("locked", null)
   }
 
   async prepare() {
-    await this.init()
-    const postsPath = this.path("posts")
-    if (!(await pathExists(postsPath))) await pfs.mkdir(postsPath)
+    if (!this.prepareProm) throw new Error("DB is locked")
+    return this.prepareProm
   }
 
-  async init() {
-    if (await pathExists(this.path(".git"))) return
+  async deletePost(post) {
+    await this.prepare()
+    return this.db.put({ ...post, _deleted: true })
+  }
 
-    console.log(`git init ${this.dir}`)
+  async loadPosts() {
+    const permit = await this.prepare()
 
-    await init(this.repo)
-    await commit({
-      ...this.repo,
-      message: "init",
-      author: {
-        name: "unijournal",
-        email: "unijournal@rtlong.com",
-      },
+    const docs = await this.db.query("box/receivers", {
+      key: permit.receiver(),
+      reduce: false,
+      include_docs: true,
     })
+
+    return docs.rows.reduce((collection, { doc }) => {
+      if (!doc.type || doc.type !== "post") return collection
+
+      collection.push(converters.fromDB(doc))
+      return collection
+    }, [])
   }
 
-  async loadPosts(cb = () => {}) {
-    const entries = await pfs.readdir(this.path("posts"))
-    return Promise.all(
-      entries.map(async filename => {
-        const path = this.path(`posts/${filename}`)
-        const stat = await pfs.stat(path)
-        const content = await pfs.readFile(path, "utf-8")
-        const post = {
-          id: basename(filename, ".md"),
-          body: content,
-          timestamp: stat.ctime,
-        }
-        cb(post)
-        return post
-      }),
-    )
+  async storePost({ id, body, timestamp, tags }) {
+    await this.prepare()
+    return this.db.put(converters.toDB({ id, body, timestamp, tags }))
   }
 
-  async storePost({ id, body }) {
-    const path = `posts/${id}.md`
-    const abspath = this.path(path)
-    await pfs.writeFile(abspath, body)
-    await add({ ...this.repo, filepath: path })
-    await commit({
-      ...this.repo,
-      message: `add new entry ${id}`,
-      author: {
-        name: "unijournal",
-        email: "unijournal@rtlong.com",
-      },
-    })
-    const stat = await pfs.stat(abspath)
-    return {
-      id,
-      body,
-      timestamp: stat.ctime,
-    }
+  async allTags() {
+    // await this.prepare()
+    // return this.db.
   }
 
-  path(relPath) {
-    return `${this.dir}/${relPath}`
+  async sync(remote) {
+    // await this.prepare()
+    return this.db.sync(remote)
   }
 }
