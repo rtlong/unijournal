@@ -13,6 +13,6 @@ function mapStateToProps(state) {
 export default connect(
   mapStateToProps,
   {
-    deletePost: deletePost,
+    deletePost,
   },
 )(PostList)

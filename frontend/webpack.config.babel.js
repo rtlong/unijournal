@@ -12,7 +12,10 @@ const isProd = process.env.NODE_ENV === "production"
 export default {
   mode: isProd ? "production" : "development",
   context: path.resolve(__dirname, "src"),
-  entry: { main: "./packs/main.jsx" },
+  entry: {
+    main: "./packs/main.jsx",
+    development: "./packs/development.js",
+  },
   output: {
     filename: isProd ? "[name]-[chunkhash].js" : "[name].js",
     path: path.resolve(__dirname, "dist"),

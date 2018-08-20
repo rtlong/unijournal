@@ -5,7 +5,7 @@
     "test": "jest",
     "lint": "eslint --ext js,jsx",
     "prettier": "prettier --loglevel warn --write",
-    "webpack-serve": "node_modules/.bin/webpack-serve --require babel-register --config webpack.config.babel.js --port 3001",
+    "webpack-serve": "node_modules/.bin/webpack-serve --require babel-register --config webpack.config.babel.js --port 3001 --host 0.0.0.0",
     "webpack": "webpack-cli --config webpack.config.babel.js"
   },
   "dependencies": {

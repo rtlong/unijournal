@@ -5,6 +5,7 @@ export function showMessage(message, type = "info", timeout = 10000) {
     const id = new Date().getTime()
 
     dispatch(addMessage(id, type, message))
+    console.log(message)
 
     if (timeout) {
       setTimeout(() => dispatch(deleteMessage(id)), timeout)
