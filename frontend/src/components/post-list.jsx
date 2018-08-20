@@ -4,8 +4,10 @@ import Post from "./post"
 
 const sort = posts => posts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 
-const PostList = ({ posts }) => (
-  <div>{sort(posts).map(post => <Post key={post.id} {...post} />)}</div>
+const PostList = ({ posts, deletePost }) => (
+  <div>
+    {sort(posts).map(post => <Post key={post.id} {...post} onDelete={() => deletePost(post)} />)}
+  </div>
 )
 
 PostList.propTypes = {

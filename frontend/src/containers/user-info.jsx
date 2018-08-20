@@ -1,17 +1,48 @@
 import React from "react"
 import PropTypes from "prop-types"
 import { connect } from "react-redux"
-import { authRequest } from "../actions"
+import { authLogIn, authLogOut } from "../action-thunks/auth"
 import Button from "../components/button"
 
-const UserInfo = ({ username }) => {
-  return username ? <div>Welcome @{username}</div> : <Button onClick={authRequest} label="Login" />
+const LoginButton = ({ onClick }) => <Button onClick={onClick} label="Login" />
+LoginButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
 }
+
+const SessionInfo = ({ username, onLogOut }) => (
+  <div>
+    Logged in: @{username}
+    <Button onClick={onLogOut} label="Log Out" />
+  </div>
+)
+SessionInfo.propTypes = {
+  username: PropTypes.string.isRequired,
+  onLogOut: PropTypes.func.isRequired,
+}
+
+const UserInfo = ({ user, logOut }) =>
+  user ? (
+    <SessionInfo onLogOut={logOut} username={user.username} />
+  ) : (
+    <LoginButton onClick={authLogIn} />
+  )
 
 UserInfo.propTypes = {
-  username: PropTypes.string.isRequired,
+  user: PropTypes.shape({
+    username: PropTypes.string.isRequired,
+  }),
+  logOut: PropTypes.func.isRequired,
+  /* logIn: PropTypes.func.isRequired, */
+}
+UserInfo.defaultProps = {
+  user: null,
 }
 
-const mapStateToProps = state => state.auth.user || {}
+const mapStateToProps = state => ({ user: state.auth.user })
 
-export default connect(mapStateToProps)(UserInfo)
+export default connect(
+  mapStateToProps,
+  {
+    logOut: authLogOut,
+  },
+)(UserInfo)
