@@ -1,17 +1,15 @@
 import React from "react"
 import { hot } from "react-hot-loader"
 
-import PostList from "./containers/post-list"
-import NewPost from "./containers/new-post"
 import Messages from "./containers/messages"
+import Journal from "./containers/journal"
 import Header from "./containers/header"
 
 const App = () => (
   <div>
     <Header />
     <Messages />
-    <NewPost />
-    <PostList />
+    <Journal />
   </div>
 )
 
