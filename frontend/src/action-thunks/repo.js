@@ -12,7 +12,7 @@ export function openDB() {
     })
     storage.on("locked", () => {
       dispatch(repoSetState({ locked: true }))
-      dispatch(receivePosts([]))
+      dispatch(loadLocalStorage())
     })
   }
 }

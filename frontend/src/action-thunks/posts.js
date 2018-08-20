@@ -1,6 +1,5 @@
 import uuid from "uuid/v4"
 
-import Storage from "../storage"
 import { receivePosts, addPost } from "../actions"
 import { showMessage, showError } from "./messages"
 
@@ -8,8 +7,14 @@ export function loadLocalStorage() {
   return async (dispatch, getState) => {
     try {
       const {
-        repo: { storage },
+        repo: { storage, locked },
       } = getState()
+
+      if (locked || !storage) {
+        dispatch(receivePosts([]))
+        return
+      }
+
       const posts = await storage.loadPosts()
       dispatch(receivePosts(posts))
     } catch (err) {
@@ -33,7 +38,7 @@ export function createPost() {
   return async (dispatch, getState) => {
     const {
       newPostForm: { source: postBody },
-      repo: { dbName },
+      repo: { storage },
     } = getState()
     if (!postBody) return
 
@@ -45,9 +50,6 @@ export function createPost() {
         tags: parseTags(postBody),
       }
       dispatch(addPost({ ...post, pending: true }))
-
-      const storage = new Storage({ dbName })
-      await storage.prepare()
 
       await storage.storePost(post)
       dispatch(showMessage("New post saved"))
@@ -64,13 +66,8 @@ export function deletePost(post) {
   return async (dispatch, getState) => {
     try {
       const {
-        auth: {
-          user: { username },
-        },
+        repo: { storage },
       } = getState()
-
-      const storage = new Storage({ dbName: username })
-      await storage.prepare()
 
       await storage.deletePost(post)
       dispatch(showMessage("Post Deleted"))
